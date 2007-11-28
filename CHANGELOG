@@ -1,0 +1,8 @@
+0.2   28 November 2007
+      alsaseq.c: added id(); modified status(), input()
+      alsamidi.py: added Seq() class and ALSACSV file format,
+      other helper functions.
+      constants.py: added, forgot to include it in 0.1
+
+0.1   09 September 2007 
+      Initial release

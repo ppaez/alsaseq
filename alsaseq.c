@@ -57,7 +57,7 @@ alsaseq_client(PyObject *self /* Not used */, PyObject *args)
   if ( createqueue )
       queue_id = snd_seq_alloc_queue(seq_handle);
   else
-      queue_id = 253;
+      queue_id = SND_SEQ_QUEUE_DIRECT;
 
   for ( n=0; n < ninputports; n++ ) {
     if (( portid = snd_seq_create_simple_port(seq_handle, "Input port",
@@ -126,14 +126,14 @@ alsaseq_stop(PyObject *self /* Not used */, PyObject *args)
 }
 
 static char alsaseq_status__doc__[] =
-"Return ( status, time ) of queue.\n\nTime is a tuple ( sec, millionths ) and reflects the queue's current time.\n\nIf the client does not have a queue the value ( 0, ( 0, 0 ) ) is returned."
+"Return ( status, time, events ) of queue.\n\nTime is a tuple ( sec, millionths ) and reflects the queue's current time.\n\nIf the client does not have a queue the value ( 0, ( 0, 0 ), 0 ) is returned."
 ;
 
 static PyObject *
 alsaseq_status(PyObject *self /* Not used */, PyObject *args)
 {
         snd_seq_queue_status_t *queue_status;
-        int running;
+        int running, events;
         const snd_seq_real_time_t *current_time;
 	if (!PyArg_ParseTuple(args, "" ))
 		return NULL;
@@ -142,15 +142,18 @@ alsaseq_status(PyObject *self /* Not used */, PyObject *args)
         snd_seq_get_queue_status( seq_handle, queue_id, queue_status );
         current_time = snd_seq_queue_status_get_real_time( queue_status );
         running = snd_seq_queue_status_get_status( queue_status );
+        events = snd_seq_queue_status_get_events( queue_status );
         snd_seq_queue_status_free( queue_status );
         
-	return Py_BuildValue( "(i(ii))", running, current_time->tv_sec, current_time->tv_nsec );
+	return Py_BuildValue( "(i(ii),i)", running, current_time->tv_sec, current_time->tv_nsec, events );
 }
 
 
 static char alsaseq_output__doc__[] =
-"output( event ) --> None.\n\nSend event immediately to output port if a queue\nhas not been created in this client.  If a queue already exists,\nuse that queue to schedule the event."
-;
+"output( event ) --> None.\n\n"
+"Send event immediately to output port if a queue\n"
+"has not been created in this client.  If a queue already exists,\n"
+"use that queue to schedule the event.";
 
 static PyObject *
 alsaseq_output(PyObject *self, PyObject *args)
@@ -176,19 +179,35 @@ alsaseq_output(PyObject *self, PyObject *args)
         case SND_SEQ_EVENT_PGMCHANGE:
         case SND_SEQ_EVENT_CHANPRESS:
         case SND_SEQ_EVENT_PITCHBEND:
-            if (!PyArg_ParseTuple( data, "bii;data parameter should have 3 values", &ev.data.control.channel, &ev.data.control.param, &ev.data.control.value ))
+            if (!PyArg_ParseTuple( data, "bbbbii;data parameter should have 6 values", &ev.data.control.channel, &ev.data.control.unused[0], &ev.data.control.unused[1], &ev.data.control.unused[2], &ev.data.control.param, &ev.data.control.value ))
             return NULL;
             break;
         }
         /* If not a direct event, use the queue */
-        if ( ev.queue != 253 )
+        if ( ev.queue != SND_SEQ_QUEUE_DIRECT )
             ev.queue = queue_id;
-        snd_seq_ev_set_source(&ev, ninputports);
-        snd_seq_ev_set_subs(&ev);
+        if ( ev.type != SND_SEQ_EVENT_ECHO ) snd_seq_ev_set_subs(&ev); /* Set to subscribed ports */
         snd_seq_event_output_direct( seq_handle, &ev );
 
 	Py_INCREF(Py_None);
 	return Py_None;
+}
+
+
+static char alsaseq_id__doc__[] =
+"id() --> number.\n\nReturn the client number.  0 if client not created yet."
+;
+
+static PyObject *
+alsaseq_id(PyObject *self, PyObject *args)
+{
+  int res = 0;
+        
+	if (!PyArg_ParseTuple(args, "" ))
+		return NULL;
+        res = snd_seq_client_id( seq_handle );
+
+        return PyInt_FromLong( res );
 }
 
 
@@ -255,12 +274,30 @@ alsaseq_input(PyObject *self, PyObject *args)
 		return NULL;
         snd_seq_event_input( seq_handle, &ev );
 
-	return Py_BuildValue( "(bbbb(ii)(bb)(bb)(bbbbi))", ev->type, ev->flags, ev->tag, ev->queue, ev->time.time.tv_sec, ev->time.time.tv_nsec, ev->source.client, ev->source.port, ev->dest.client, ev->dest.port, ev->data.note.channel, ev->data.note.note, ev->data.note.velocity, ev->data.note.off_velocity, ev->data.note.duration );
+        switch( ev->type ) {
+        case SND_SEQ_EVENT_NOTE:
+        case SND_SEQ_EVENT_NOTEON:
+        case SND_SEQ_EVENT_NOTEOFF:
+        case SND_SEQ_EVENT_KEYPRESS:
+            return Py_BuildValue( "(bbbb(ii)(bb)(bb)(bbbbi))", ev->type, ev->flags, ev->tag, ev->queue, ev->time.time.tv_sec, ev->time.time.tv_nsec, ev->source.client, ev->source.port, ev->dest.client, ev->dest.port, ev->data.note.channel, ev->data.note.note, ev->data.note.velocity, ev->data.note.off_velocity, ev->data.note.duration );
+            break;
+
+        case SND_SEQ_EVENT_CONTROLLER:
+        case SND_SEQ_EVENT_PGMCHANGE:
+        case SND_SEQ_EVENT_CHANPRESS:
+        case SND_SEQ_EVENT_PITCHBEND:
+            return Py_BuildValue( "(bbbb(ii)(bb)(bb)(bbbbii))", ev->type, ev->flags, ev->tag, ev->queue, ev->time.time.tv_sec, ev->time.time.tv_nsec, ev->source.client, ev->source.port, ev->dest.client, ev->dest.port, ev->data.control.channel, ev->data.control.unused[0], ev->data.control.unused[1], ev->data.control.unused[2], ev->data.control.param, ev->data.control.value );
+            break;
+
+        default:
+            return Py_BuildValue( "(bbbb(ii)(bb)(bb)(bbbbi))", ev->type, ev->flags, ev->tag, ev->queue, ev->time.time.tv_sec, ev->time.time.tv_nsec, ev->source.client, ev->source.port, ev->dest.client, ev->dest.port, ev->data.note.channel, ev->data.note.note, ev->data.note.velocity, ev->data.note.off_velocity, ev->data.note.duration );
+        }
+
 }
 
 
 static char alsaseq_inputpending__doc__[] =
-"input() --> number.\n\nReturn number of bytes available in input buffer."
+"inputpending() --> number.\n\nReturn number of bytes available in input buffer."
 ;
 
 static PyObject *
@@ -273,6 +310,25 @@ alsaseq_inputpending(PyObject *self, PyObject *args)
         res = snd_seq_event_input_pending( seq_handle, 1 ); /* fetch_sequencer */
 
         return PyInt_FromLong( res );
+}
+
+static char alsaseq_fd__doc__[] =
+"fd() --> number.\n\nReturn fileno of sequencer."
+;
+
+static PyObject *
+alsaseq_fd(PyObject *self, PyObject *args)
+{
+  int npfd;
+  struct pollfd *pfd;
+        
+	if (!PyArg_ParseTuple(args, "" ))
+		return NULL;
+  npfd = snd_seq_poll_descriptors_count(seq_handle, POLLIN);
+  pfd = (struct pollfd *)alloca(npfd * sizeof(struct pollfd));
+  snd_seq_poll_descriptors(seq_handle, pfd, npfd, POLLIN);
+
+        return PyInt_FromLong( pfd->fd );
 }
 
 
@@ -289,7 +345,9 @@ static struct PyMethodDef alsaseq_methods[] = {
  {"connectto",	(PyCFunction)alsaseq_connectto,	METH_VARARGS,	alsaseq_connectto__doc__},
  {"connectfrom",	(PyCFunction)alsaseq_connectfrom,	METH_VARARGS,	alsaseq_connectfrom__doc__},
  {"inputpending",	(PyCFunction)alsaseq_inputpending,	METH_VARARGS,	alsaseq_inputpending__doc__},
+ {"id",	(PyCFunction)alsaseq_id,	METH_VARARGS,	alsaseq_id__doc__},
  {"input",	(PyCFunction)alsaseq_input,	METH_VARARGS,	alsaseq_input__doc__},
+ {"fd",	(PyCFunction)alsaseq_fd,	METH_VARARGS,	alsaseq_fd__doc__},
  
 	{NULL,	 (PyCFunction)NULL, 0, NULL}		/* sentinel */
 };
