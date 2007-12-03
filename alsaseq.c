@@ -27,11 +27,19 @@ static PyObject *ErrorObject;
 /* ----------------------------------------------------- */
 
 static char alsaseq_client__doc__[] =
-"client( name, ninputports, noutputports, createqueue ) --> None.\n\nCreate an ALSA sequencer client with zero or more input or output ports, and optionally a timing queue.\n\nninputports and noutputports are created if quantity requested is between 1 and 4 for each.\ncreatequeue = True creates a queue for stamping arrival time of incoming events and scheduling future start time of outgoing events.\ncreatequeue = None will create a client that receives events without stamping arrival time and sends outgoing events for imediate execution."
-;
+"client( name, ninputports, noutputports, createqueue ) --> None.\n\n"
+"Create an ALSA sequencer client with zero or more input or output ports,\n"
+"and optionally a timing queue.\n\n"
+"ninputports and noutputports are created if quantity requested is\n"
+"between 1 and 4 for each.\n\n"
+"createqueue = True creates a queue for stamping arrival time of incoming\n"
+"events and scheduling future start time of outgoing events.\n\n"
+"createqueue = None creates a client that receives events without\n"
+"stamping arrival time and sends outgoing events for imediate execution.";
 
 snd_seq_t *seq_handle;
 int queue_id, ninputports, noutputports, createqueue;
+int firstoutputport, lastoutputport;
 
 static PyObject *
 alsaseq_client(PyObject *self /* Not used */, PyObject *args)
@@ -86,6 +94,8 @@ alsaseq_client(PyObject *self /* Not used */, PyObject *args)
       exit(1);
     }
   }
+    firstoutputport = ninputports;
+    lastoutputport  = noutputports + ninputports - 1;
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -126,8 +136,11 @@ alsaseq_stop(PyObject *self /* Not used */, PyObject *args)
 }
 
 static char alsaseq_status__doc__[] =
-"Return ( status, time, events ) of queue.\n\nTime is a tuple ( sec, millionths ) and reflects the queue's current time.\n\nIf the client does not have a queue the value ( 0, ( 0, 0 ), 0 ) is returned."
-;
+"Return ( status, time, events ) of queue.\n\n"
+"Status: 0 if stopped, 1 if running.\n"
+"Time:   current time as ( sec, nanoseconds ) tuple.\n"
+"Events: number of output events scheduled in the queue.\n\n"
+"If the client does not have a queue the value ( 0, ( 0, 0 ), 0 ) is returned.";
 
 static PyObject *
 alsaseq_status(PyObject *self /* Not used */, PyObject *args)
@@ -151,9 +164,17 @@ alsaseq_status(PyObject *self /* Not used */, PyObject *args)
 
 static char alsaseq_output__doc__[] =
 "output( event ) --> None.\n\n"
-"Send event immediately to output port if a queue\n"
-"has not been created in this client.  If a queue already exists,\n"
-"use that queue to schedule the event.";
+"Send event to output port, scheduled if a queue exists,\n"
+"immediately if no queue was created in the client.\n\n"
+"If only one port exists, all events are sent to that port.\n"
+"If two or more output ports exist, source port of event determines\n"
+"output port to use.  First output port or last output port will be\n"
+"used if port is beyond first or last output port number.\n\n"
+"An event sent to an output port will be sent to all clients that were\n"
+"subscribed using the connectto() function in this module.\n\n"
+"If the queue buffer is full, output() will wait until space is available\n"
+"to output the event.\n"
+"Use status()[2] to know how many events are scheduled in the queue.";
 
 static PyObject *
 alsaseq_output(PyObject *self, PyObject *args)
@@ -186,7 +207,13 @@ alsaseq_output(PyObject *self, PyObject *args)
         /* If not a direct event, use the queue */
         if ( ev.queue != SND_SEQ_QUEUE_DIRECT )
             ev.queue = queue_id;
-        if ( ev.type != SND_SEQ_EVENT_ECHO ) snd_seq_ev_set_subs(&ev); /* Set to subscribed ports */
+        /* Modify source port if out of bounds */
+        if ( ev.source.port < firstoutputport ) 
+           snd_seq_ev_set_source(&ev, firstoutputport );
+        else if ( ev.source.port > lastoutputport )
+           snd_seq_ev_set_source(&ev, lastoutputport );
+        /* Use subscribed ports, except if ECHO event */
+        if ( ev.type != SND_SEQ_EVENT_ECHO ) snd_seq_ev_set_subs(&ev);
         snd_seq_event_output_direct( seq_handle, &ev );
 
 	Py_INCREF(Py_None);
@@ -227,8 +254,11 @@ alsaseq_syncoutput(PyObject *self, PyObject *args)
 
 
 static char alsaseq_connectto__doc__[] =
-"connectto( myport, dest_client, dest_port ) --> None.\n\nConnect from myport to dest_client:dest_port."
-;
+"connectto( outputport, dest_client, dest_port ) --> None.\n\n"
+"Connect outputport to dest_client:dest_port.  Each outputport can be\n"
+"Connected to more than one client.  Events sent to an output port\n"
+"using the the output() funtion will be sent to all clients that are\n"
+"connected to it using this function.";;
 
 static PyObject *
 alsaseq_connectto(PyObject *self, PyObject *args)
@@ -245,8 +275,12 @@ alsaseq_connectto(PyObject *self, PyObject *args)
 
 
 static char alsaseq_connectfrom__doc__[] =
-"connectfrom( myport, src_client, src_port ) --> None.\n\nConnect from src_client:src_port to myport."
-;
+"connectfrom( inputport, src_client, src_port ) --> None.\n\n"
+"Connect from src_client:src_port to inputport.  Each input port\n"
+"can connect from more than one client.\n\n"
+"The input() function will receive events from any intput port and\n"
+"any of the clients connected to each of them.\n"
+"Events from each client can be distinguised by their source field.";
 
 static PyObject *
 alsaseq_connectfrom(PyObject *self, PyObject *args)
@@ -263,7 +297,14 @@ alsaseq_connectfrom(PyObject *self, PyObject *args)
 
 
 static char alsaseq_input__doc__[] =
-"input() --> event.\n\nWait for an ALSA event in the input port and return it.\n\nALSA events are returned as a tuple with 8 elements:\n    (type, flags, tag, queue, time stamp, source, destination, data)\n\nSome elements are also tuples:\n    time = (seconds, millionths)\n    source, destination = (client, port)\n    data = ( varies depending on type )";
+"input() --> event.\n\nWait for an ALSA event in any of the input ports and return it.\n\n"
+"ALSA events are returned as a tuple with 8 elements:\n"
+"    (type, flags, tag, queue, time stamp, source, destination, data)\n\n"
+"Some elements are also tuples:\n"
+"    time = (seconds, nanoseconds)\n"
+"    source, destination = (client, port)\n"
+"    data = ( varies depending on type )\n\n"
+"See DATA section below for event type constants.";
 
 static PyObject *
 alsaseq_input(PyObject *self, PyObject *args)
@@ -297,8 +338,9 @@ alsaseq_input(PyObject *self, PyObject *args)
 
 
 static char alsaseq_inputpending__doc__[] =
-"inputpending() --> number.\n\nReturn number of bytes available in input buffer."
-;
+"inputpending() --> number.\n\n"
+"Return number of bytes available in input buffer.\n"
+"Use before input() to know if events are ready to be read.";
 
 static PyObject *
 alsaseq_inputpending(PyObject *self, PyObject *args)

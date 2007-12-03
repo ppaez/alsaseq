@@ -55,7 +55,7 @@ def noteevent( ch, key, vel, start, duration ):
     'Returns an ALSA event tuple to be scheduled by alsaseq.output().'
     
     return ( alsaseq.SND_SEQ_EVENT_NOTE, alsaseq.SND_SEQ_TIME_STAMP_REAL,
-        0, queue, ( start/1000, start%1000 * 1000000),
+        0, queue, ( int( start/1000. ), int( start%1000 * 1000000 ) ),
         ( 0, 0 ), ( 0,0 ), ( ch, key, vel, 0, duration ) )
 
 def noteonevent( ch, key, vel ):
@@ -123,7 +123,7 @@ def tuple2time( timetuple ):
 
 def time2tuple( timevalue ):
     '''Convert float time to ( seconds, millionths ) tuple'''
-    return ( int( timevalue ), int( ( timevalue - int( timevalue )) * 1000000000 ) )
+    return ( int( float( timevalue ) ), int( ( timevalue - int( timevalue )) * 1000000000 ) )
 
 def modifyevent( event, timedelta=0, ch=0, dest=0, source=0, queue=0, keydelta=0 ):
     '''Returns event with one or more modified fields.
