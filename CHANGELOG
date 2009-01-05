@@ -1,3 +1,10 @@
+0.3   05 January 2009
+      constants.c: Updated to alsa-lib-1.0.17a
+      doc/project.html: generated with .rst
+      doc/project.rst: new file
+      doc/project.pdf: removed
+      Makefile: new file
+
 0.2.1 05 December 2007
       alsaseq.c: Fix source port handling in output(), improved doc strings.
       alsamidi.py: Fix time2tuple(), tuple2time().

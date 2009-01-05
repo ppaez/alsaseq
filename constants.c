@@ -1,4 +1,21 @@
-/* sed -n '/enum snd_seq_event_type/,/};/p' alsa-lib-1.0.13/include/alsa/seq_event.h | gawk '/SND_SEQ/ {sub(",", "", $1); print "PyModule_AddIntConstant( m, \"" $1 "\", " $1 " );" }' >> constants.c */
+/*
+    constants.c - ALSA sequencer bindings for Python
+
+    Copyright (c) 2007 Patricio Paez <pp@pp.com.mx>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
 
 PyModule_AddIntConstant( m, "SND_SEQ_EVENT_SYSTEM", SND_SEQ_EVENT_SYSTEM );
 PyModule_AddIntConstant( m, "SND_SEQ_EVENT_RESULT", SND_SEQ_EVENT_RESULT );
@@ -41,15 +58,6 @@ PyModule_AddIntConstant( m, "SND_SEQ_EVENT_PORT_EXIT", SND_SEQ_EVENT_PORT_EXIT )
 PyModule_AddIntConstant( m, "SND_SEQ_EVENT_PORT_CHANGE", SND_SEQ_EVENT_PORT_CHANGE );
 PyModule_AddIntConstant( m, "SND_SEQ_EVENT_PORT_SUBSCRIBED", SND_SEQ_EVENT_PORT_SUBSCRIBED );
 PyModule_AddIntConstant( m, "SND_SEQ_EVENT_PORT_UNSUBSCRIBED", SND_SEQ_EVENT_PORT_UNSUBSCRIBED );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_SAMPLE", SND_SEQ_EVENT_SAMPLE );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_SAMPLE_CLUSTER", SND_SEQ_EVENT_SAMPLE_CLUSTER );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_SAMPLE_START", SND_SEQ_EVENT_SAMPLE_START );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_SAMPLE_STOP", SND_SEQ_EVENT_SAMPLE_STOP );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_SAMPLE_FREQ", SND_SEQ_EVENT_SAMPLE_FREQ );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_SAMPLE_VOLUME", SND_SEQ_EVENT_SAMPLE_VOLUME );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_SAMPLE_LOOP", SND_SEQ_EVENT_SAMPLE_LOOP );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_SAMPLE_POSITION", SND_SEQ_EVENT_SAMPLE_POSITION );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_SAMPLE_PRIVATE1", SND_SEQ_EVENT_SAMPLE_PRIVATE1 );
 PyModule_AddIntConstant( m, "SND_SEQ_EVENT_USR0", SND_SEQ_EVENT_USR0 );
 PyModule_AddIntConstant( m, "SND_SEQ_EVENT_USR1", SND_SEQ_EVENT_USR1 );
 PyModule_AddIntConstant( m, "SND_SEQ_EVENT_USR2", SND_SEQ_EVENT_USR2 );
@@ -60,25 +68,6 @@ PyModule_AddIntConstant( m, "SND_SEQ_EVENT_USR6", SND_SEQ_EVENT_USR6 );
 PyModule_AddIntConstant( m, "SND_SEQ_EVENT_USR7", SND_SEQ_EVENT_USR7 );
 PyModule_AddIntConstant( m, "SND_SEQ_EVENT_USR8", SND_SEQ_EVENT_USR8 );
 PyModule_AddIntConstant( m, "SND_SEQ_EVENT_USR9", SND_SEQ_EVENT_USR9 );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_BEGIN", SND_SEQ_EVENT_INSTR_BEGIN );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_END", SND_SEQ_EVENT_INSTR_END );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_INFO", SND_SEQ_EVENT_INSTR_INFO );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_INFO_RESULT", SND_SEQ_EVENT_INSTR_INFO_RESULT );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_FINFO", SND_SEQ_EVENT_INSTR_FINFO );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_FINFO_RESULT", SND_SEQ_EVENT_INSTR_FINFO_RESULT );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_RESET", SND_SEQ_EVENT_INSTR_RESET );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_STATUS", SND_SEQ_EVENT_INSTR_STATUS );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_STATUS_RESULT", SND_SEQ_EVENT_INSTR_STATUS_RESULT );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_PUT", SND_SEQ_EVENT_INSTR_PUT );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_GET", SND_SEQ_EVENT_INSTR_GET );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_GET_RESULT", SND_SEQ_EVENT_INSTR_GET_RESULT );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_FREE", SND_SEQ_EVENT_INSTR_FREE );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_LIST", SND_SEQ_EVENT_INSTR_LIST );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_LIST_RESULT", SND_SEQ_EVENT_INSTR_LIST_RESULT );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_CLUSTER", SND_SEQ_EVENT_INSTR_CLUSTER );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_CLUSTER_GET", SND_SEQ_EVENT_INSTR_CLUSTER_GET );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_CLUSTER_RESULT", SND_SEQ_EVENT_INSTR_CLUSTER_RESULT );
-PyModule_AddIntConstant( m, "SND_SEQ_EVENT_INSTR_CHANGE", SND_SEQ_EVENT_INSTR_CHANGE );
 PyModule_AddIntConstant( m, "SND_SEQ_EVENT_SYSEX", SND_SEQ_EVENT_SYSEX );
 PyModule_AddIntConstant( m, "SND_SEQ_EVENT_BOUNCE", SND_SEQ_EVENT_BOUNCE );
 PyModule_AddIntConstant( m, "SND_SEQ_EVENT_USR_VAR0", SND_SEQ_EVENT_USR_VAR0 );
