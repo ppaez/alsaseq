@@ -18,7 +18,7 @@
 alsaseq – ALSA sequencer bindings for Python 
 ============================================
 
-*alsaseq* is a Python module that allows to interact with ALSA
+*alsaseq* is a Python 3 and Python 2 module that allows to interact with ALSA
 sequencer clients. It can create an ALSA client, connect to other
 clients, send and receive ALSA events immediately or at a scheduled
 time using a sequencer queue. It provides a subset of the ALSA
@@ -34,12 +34,12 @@ The project is available at http://pp.com.mx/python/alsaseq
 Requirements
 ~~~~~~~~~~~~
 
-The Python and the ALSA development header files, as well as the
-GNU C compiler are needed to compile the module. If you use Ubuntu,
-make sure that the 
-**python-dev**, **libasound2-dev** and **gcc** packages are installed;
-for Mandriva, check that the
-**libpython2.4-devel**,  **libalsa2-devel** and **gcc** packages
+The Python and the ALSA development header files, as well as the GNU C compiler
+are needed to compile the module. If you use Debian or a distribution derived
+from Debian like Ubuntu, make sure that the **python-dev** (for Python 2),
+**python3-dev** (for Python 3), **libasound2-dev** and **gcc** packages are
+installed. If you use Mandriva, check that the **libpython2.6-devel** (for Python 2),
+**libpython3.1-devel** (for Python 3),  **libalsa2-devel** and **gcc** packages
 are installed.
 
 
@@ -60,15 +60,26 @@ Enter the folder alsaseq-<version> that was created::
 
 To compile the module::
 
- $ make
- 
-Test that the compilation was sucessfull::
-
- $ make test
+ $ python setup.py build
 
 To install the module, execute as root:: 
  
- # sudo make install 
+ # python setup.py install
+
+To test::
+
+ $ python -c 'import alsaseq, alsamidi'
+
+For python 3, the last three commands should be::
+
+ $ python3 setup.py build
+
+ # python3 setup.py install
+
+ $ python3 -c 'import alsaseq, alsamidi'
+
+It is possible to build and install the module for both Python 2 and 3, both
+versions can coexist in the same system.
 
 Interactive use
 ~~~~~~~~~~~~~~~
@@ -227,18 +238,25 @@ Appendix
 Manually build and install
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This is just provided for informational purposes, in case de Makefile
-does not work or just for fun.
+This is just provided for informational purposes, in case the setup.py
+does not work or just for fun.  The following commands assume that Python 2.6
+or Python 3.1 are installed; adjust the paths if a different version is used.
 
 To compile the module::
 
- $ gcc -shared -I /usr/include/python2.5 -lasound -o alsaseq.so alsaseq.c
+ $ gcc -shared -Wall -I /usr/include/python2.6 -lasound -o alsaseq.so alsaseq.c
 
 To install the module, copy the **alsaseq.so**, **alsamidi.py** and 
 **midiinstruments.py** files to
-/usr/local/lib/python2.5 as root::
+/usr/local/lib/python2.6 as root::
 
- # install alsaseq.so alsamidi.py midiinstruments.py /usr/local/lib/python2.5/site-packages
+ # install alsaseq.so alsamidi.py midiinstruments.py /usr/local/lib/python2.6/site-packages
+
+For Python 3::
+
+ $ gcc -shared -I /usr/include/python3.1 -lasound -o alsaseq.so alsaseq.c
+
+ # install alsaseq.so alsamidi.py midiinstruments.py /usr/local/lib/python3.1/site-packages
 
 Recommendations about MIDI software and hardware
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -252,9 +270,9 @@ you may use a virtual keyboard like **vkeybd**, available from
 a package with the same name.
 
 If you have a MIDI keyboard or piano and/or a hardware MIDI sound
-module, you may connect them to your PC using a USB-to-MIDI interface.
-I have tried the MIDI 1x1  from E-EMU and the MIDIsport UNO
-from M-AUDIO.
+module, you may connect them to your PC using a *USB-to-MIDI interface*.
+I use the **MIDI 1x1**  from *E-EMU* and the **MIDIsport UNO**
+from *M-AUDIO* which work fine.
 
 
 .. |date| date::

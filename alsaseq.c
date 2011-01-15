@@ -17,8 +17,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-#include "Python.h"
+#include <Python.h>
 #include <alsa/asoundlib.h>
+
+#define PyInt_FromLong PyLong_FromLong
 
 #define maximum_nports 4
 
@@ -179,8 +181,6 @@ static char alsaseq_output__doc__[] =
 static PyObject *
 alsaseq_output(PyObject *self, PyObject *args)
 {
-  int port_out_id = 0, relative = 0;
-  struct snd_seq_real_time timestamp;
   snd_seq_event_t ev;
   static PyObject * data;
         
@@ -374,6 +374,18 @@ alsaseq_fd(PyObject *self, PyObject *args)
 }
 
 
+/* start python 2 & python 3 dual support for initialization */
+
+struct module_state {
+    PyObject *error;
+};
+
+#if PY_MAJOR_VERSION >= 3
+#define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+#else
+#define GETSTATE(m) (&_state)
+static struct module_state _state;
+#endif
 
 /* List of methods defined in the module */
 
@@ -395,25 +407,76 @@ static struct PyMethodDef alsaseq_methods[] = {
 };
 
 
-/* Initialization function for the module (*must* be called initalsaseq) */
-
+/* Module description */
 static char alsaseq_module_documentation[] = 
 "This modules provides access to the ALSA sequencer.\n\nIt provides easy access to the ALSA sequencer.\n\nExample of use basic use:\n\nclient( 'Python client', 1, 1, False )\nconnectto( 0, 129, 0 )\nconnectfrom( 1, 130, 0 )\nif inputpending():\n    event = input()\n    output( event )\n\nTo timestamp incoming events and to schedule outgoing events,\nuse True for the createqueue parameter.\n"
 ;
+/* continue python 2 & 3 dual support */
 
+#if PY_MAJOR_VERSION >= 3
+static int alsaseq_traverse(PyObject *m, visitproc visit, void *arg) {
+    Py_VISIT(GETSTATE(m)->error);
+    return 0;
+}
+
+static int alsaseq_clear(PyObject *m) {
+    Py_CLEAR(GETSTATE(m)->error);
+    return 0;
+}
+
+
+static struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "alsaseq",
+        alsaseq_module_documentation,
+        sizeof(struct module_state),
+        alsaseq_methods,
+        NULL,
+        alsaseq_traverse,
+        alsaseq_clear,
+        NULL
+};
+
+#define INITERROR return NULL
+
+PyObject *
+PyInit_alsaseq(void)
+
+#else
+#define INITERROR return
+
+/* Initialization function for the module (*must* be called initalsaseq) */
 void
-initalsaseq()
+initalsaseq(void)
+#endif
 {
-	PyObject *m, *d;
+	PyObject *d;
+#if PY_MAJOR_VERSION >= 3
+    PyObject *m = PyModule_Create(&moduledef);
+#else
+	PyObject *m;
 
 	/* Create the module and add the functions */
-	m = Py_InitModule4("alsaseq", alsaseq_methods,
-		alsaseq_module_documentation,
-		(PyObject*)NULL,PYTHON_API_VERSION);
+	m = Py_InitModule3("alsaseq", alsaseq_methods,
+		alsaseq_module_documentation );
+#endif
+
+    /* Handle module creation failure */
+    if (m == NULL)
+        INITERROR;
+
+    /* Add exception */
+    struct module_state *st = GETSTATE(m);
+    st->error = PyErr_NewException("alsaseq.Error", NULL, NULL);
+    /* check for errors */
+    if (st->error == NULL) {
+        Py_DECREF(m);
+        INITERROR;
+    }
 
 	/* Add some symbolic constants to the module */
 	d = PyModule_GetDict(m);
-	ErrorObject = PyString_FromString("alsaseq.error");
+	ErrorObject = PyUnicode_FromString("alsaseq.error");
 	PyDict_SetItemString(d, "error", ErrorObject);
 
 	/* XXXX Add constants here */
@@ -422,5 +485,10 @@ initalsaseq()
 	/* Check for errors */
 	if (PyErr_Occurred())
 		Py_FatalError("can't initialize module alsaseq");
+
+#if PY_MAJOR_VERSION >= 3
+    return m;
+#endif
+
 }
 

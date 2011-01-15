@@ -46,8 +46,8 @@ SND_SEQ_QUEUE_DIRECT = 253
 import alsaseq, sys, string
 from midiinstruments import *
 
-instrnames = dict( map( lambda e: (int(e[0]), e[1]  ),map( lambda s: s.split('   '), strinstrnames.splitlines() ) ) )
-drumnames  = dict( map( lambda e: (int(e[0]), e[1]  ),map( lambda s: s.split('   '), strdrumnames.splitlines() ) ) )
+instrnames = dict( [(int(e[0]), e[1]  ) for e in [s.split('   ') for s in strinstrnames.splitlines()]] )
+drumnames  = dict( [(int(e[0]), e[1]  ) for e in [s.split('   ') for s in strdrumnames.splitlines()]] )
 
 queue = 0
 
@@ -185,10 +185,10 @@ def uniquenotes( events ):
     for event in events:
         if event[ TYPE ] in [ 5,6,7 ]:
             channel = event[ DATA ][ 0 ]
-            if not channels.has_key( channel ):
+            if channel not in channels:
                 channels[ channel ] = []
             channels[ channel ].append( event[ DATA ][1] )
-    for channel in channels.keys():
+    for channel in list(channels.keys()):
         notes = list( set( channels[ channel ] ) )
         notes.sort()
         channels[ channel ] = notes
@@ -211,16 +211,16 @@ class Seq:
         tracks = self.tracks
         tags = self.tags
         names = names + ['track'] * ( len(tracks) - len(names) )
-        if tags: print tags
+        if tags: print(tags)
         for i, track in enumerate( tracks ):
           if track:
             inicio = track[ 0 ][ 4 ][ 0 ]
             final = track[ -1 ][ 4 ][ 0 ]
             druminsts = []
-            if uniquenotes( track ).keys() == [9]:
+            if list(uniquenotes( track ).keys()) == [9]:
                 for drumnumber in uniquenotes( track )[9]:
                     druminsts.append( drumnames[ int(drumnumber) ] )
-            print str(i) + ':', names[i].ljust( 15 ), final - inicio, 'Sec.', len(track), 'events,', uniquenotes( track ), ','.join( druminsts )
+            print(str(i) + ':', names[i].ljust( 15 ), final - inicio, 'Sec.', len(track), 'events,', uniquenotes( track ), ','.join( druminsts ))
 
     def read( self, path ):
         'Read data from ALSACSV file.'
@@ -233,7 +233,7 @@ class Seq:
             for line in f.readlines():
               if line[-1] == '\n': line = line[ :-1 ]
               if '=' in line:
-                variable, valor = map( string.strip, line.split( '=' ) )
+                variable, valor = list(map( string.strip, line.split( '=' ) ))
                 tags[ variable ] = valor
                 orderedtags.append( variable )
               elif 'track' in line:
@@ -251,8 +251,8 @@ class Seq:
                         campos.append( tuple( map( int, c.split() ) ) )
                 tracks[ -1 ].append( tuple( campos ) )
         except:
-            print 'Error reading file', path
-            print sys.exc_info()[1]
+            print('Error reading file', path)
+            print(sys.exc_info()[1])
         self.names = names
         self.tracks = tracks
         self.tags = tags
@@ -283,6 +283,6 @@ class Seq:
                             l.append( ' '.join( map( str, field )) )
                     f.write( ','.join( l ) + '\n' )
         except:
-            print 'Error saving file', path
-            print sys.exc_info()[1]
+            print('Error saving file', path)
+            print(sys.exc_info()[1])
 

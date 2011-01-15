@@ -8,3 +8,5 @@ For his Tutorial about the ALSA sequencer and the examples
 * Clemens Ladisch
 For arecordmidi.c and aplaymidi.c.  arecordmidi.c teached how to set up a timestamping input port using a port_info structure.
 
+* Torsten Kurbad
+For providing an initial setup.py for this project, which led me to learn about distutils. 
