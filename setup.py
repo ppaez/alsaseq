@@ -7,7 +7,7 @@ except ImportError:
 
 import sys,os,string,time
 
-version = '0.4'
+version = '0.4.1'
 
 kwargs = dict()
 if has_setuptools:
@@ -41,7 +41,7 @@ setup(
 		'midiinstruments',
 	],
 	data_files = [ ( 'share/alsaseq-' + version, [ 'COPYING',
-		'CHANGELOG', 'README', 'CREDITS', 'doc/project.html'
+		'CHANGELOG', 'README', 'CREDITS', 'doc/project.html',
                 'doc/project.rst'] ) ],
 	platforms = ['linux'],
 	long_description='''alsaseq is a Python 3 and Python 2 module that allows to interact with ALSA

@@ -1,3 +1,6 @@
+0.4.1 26 January 2011
+      setup.py: Added missing comma
+
 0.4   14 January 2011
       alsaseq.c: Support Python 3 and 2, removed unused variables
       alsamidi.py: Support Python 3 and 2.
