@@ -51,8 +51,12 @@ time using a sequencer queue. It provides a subset of the ALSA
 sequencer capabilities in a simplified model. It is implemented in
 C language and licensed under the Gnu GPL license version 2 or
 later.''',
-	classifiers=[ "Development Status :: 3 - Alpha",
-            "Topic :: Multimedia :: Sound/Audio :: MIDI" ],
+	classifiers=[
+            "Development Status :: 3 - Alpha",
+            "Topic :: Multimedia :: Sound/Audio :: MIDI",
+            "Programming Language :: Python :: 2",
+            "Programming Language :: Python :: 3",
+            ],
 	package_dir = {'': '.',},
 	**kwargs
 )
