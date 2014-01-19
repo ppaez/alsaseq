@@ -1,20 +1,8 @@
-has_setuptools = False
-try:
-	from setuptools import setup, Extension
-	has_setuptools = True
-except ImportError:
-	from distutils.core import setup, Extension
-
-import sys,os,string,time
+from distutils.core import setup, Extension
 
 version = '0.4.1'
 
 kwargs = dict()
-if has_setuptools:
-	kwargs = dict(
-			include_package_data = True,
-			install_requires = ['setuptools'],
-			zip_safe = False)
 
 setup(
 	#-- Package description
