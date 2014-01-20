@@ -51,6 +51,40 @@ class PgmChangeEvent(TestCase):
         self.assertEqual(expected, pgmchangeevent(1, 9, 1000))
 
 
+class PitchbendEvent(TestCase):
+
+    def test_sent_directly(self):
+        from alsamidi import pitchbendevent
+
+        data = (1, 0, 9)
+        expected = (13, 1, 0, 253, (0, 0), (0, 0), (0, 0), data)
+        self.assertEqual(expected, pitchbendevent(1, 9))
+
+    def test_scheduled(self):
+        from alsamidi import pitchbendevent
+
+        data = (1, 0, 9)
+        expected = (13, 1, 0, 0, (1, 0), (0, 0), (0, 0), data)
+        self.assertEqual(expected, pitchbendevent(1, 9, 1000))
+
+
+class ChanPress(TestCase):
+
+    def test_sent_directly(self):
+        from alsamidi import chanpress
+
+        data = (1, 0, 9)
+        expected = (12, 1, 0, 253, (0, 0), (0, 0), (0, 0), data)
+        self.assertEqual(expected, chanpress(1, 9))
+
+    def test_scheduled(self):
+        from alsamidi import chanpress
+
+        data = (1, 0, 9)
+        expected = (12, 1, 0, 0, (1, 0), (0, 0), (0, 0), data)
+        self.assertEqual(expected, chanpress(1, 9, 1000))
+
+
 class Merge(TestCase):
 
     def test_no_tracks(self):

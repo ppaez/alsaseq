@@ -95,7 +95,7 @@ def pitchbendevent( ch, value, start = -1 ):
 
     if start < 0:
         return ( alsaseq.SND_SEQ_EVENT_PITCHBEND, alsaseq.SND_SEQ_TIME_STAMP_REAL,
-        0, SND_SEQ_QUEUE_DIRECT, ( start/1000, start%1000 * 1000000),
+        0, SND_SEQ_QUEUE_DIRECT, (0, 0),
         ( 0, 0 ), ( 0,0 ), ( ch, 0, value ) )
     else:
         return ( alsaseq.SND_SEQ_EVENT_PITCHBEND, alsaseq.SND_SEQ_TIME_STAMP_REAL,
@@ -110,7 +110,7 @@ def chanpress( ch, value, start = -1 ):
 
     if start < 0:
         return ( alsaseq.SND_SEQ_EVENT_CHANPRESS, alsaseq.SND_SEQ_TIME_STAMP_REAL,
-        0, SND_SEQ_QUEUE_DIRECT, ( start/1000, start%1000 * 1000000),
+        0, SND_SEQ_QUEUE_DIRECT, (0, 0),
         ( 0, 0 ), ( 0,0 ), ( ch, 0, value ) )
     else:
         return ( alsaseq.SND_SEQ_EVENT_CHANPRESS, alsaseq.SND_SEQ_TIME_STAMP_REAL,
