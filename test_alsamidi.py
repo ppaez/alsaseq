@@ -85,6 +85,48 @@ class ChanPress(TestCase):
         self.assertEqual(expected, chanpress(1, 9, 1000))
 
 
+class Tuple2Time(TestCase):
+
+    def test(self):
+        from alsamidi import tuple2time
+
+        self.assertEqual(1.5, tuple2time((1, 500000000)))
+
+
+class Time2Tuple(TestCase):
+
+    def test(self):
+        from alsamidi import time2tuple
+
+        self.assertEqual((1, 500000000), time2tuple(1.5))
+
+
+class ModifyEvent(TestCase):
+
+    def test(self):
+        from alsamidi import modifyevent
+
+        data = (1, 60, 127, 0, 10)
+        event = (5, 1, 0, 0, (1, 0), (0, 0), (0, 0), data)
+        modified_data = (15, 72, 127, 0, 10)
+        modified_event = (5, 1, 0, 250, (2, 0), (2, 0), (3, 0), modified_data)
+        self.assertEqual(modified_event, modifyevent(event, timedelta=1,
+                ch=15, dest=(3, 0), source=(2, 0), queue=250, keydelta=12))
+
+
+class ModifyEvents(TestCase):
+
+    def test(self):
+        from alsamidi import modifyevents
+
+        data = (1, 60, 127, 0, 10)
+        event = (5, 1, 0, 0, (1, 0), (0, 0), (0, 0), data)
+        modified_data = (15, 72, 127, 0, 10)
+        modified_event = (5, 1, 0, 250, (2, 0), (2, 0), (3, 0), modified_data)
+        self.assertEqual([modified_event], modifyevents([event], timedelta=1,
+                ch=15, dest=(3, 0), source=(2, 0), queue=250, keydelta=12))
+
+
 class Merge(TestCase):
 
     def test_no_tracks(self):
@@ -97,6 +139,39 @@ class Merge(TestCase):
 
         event = (0, 0, 0, 0, 0)
         self.assertEqual([event], merge([[event]]))
+
+
+class UniqueNotes(TestCase):
+
+    def test(self):
+        from alsamidi import uniquenotes
+
+        data = (1, 60, 127, 0, 10)
+        event = (5, 1, 0, 0, (1, 0), (0, 0), (0, 0), data)
+        expected = {1: [60]}
+        self.assertEqual(expected, uniquenotes([event]))
+
+
+class TestSeq(TestCase):
+
+    def test_instance(self):
+        from alsamidi import Seq
+
+        self.assertTrue(isinstance(Seq(), Seq))
+
+    def test_info(self):
+        from alsamidi import Seq
+
+        data = (9, 60, 127, 0, 10)
+        event = (5, 1, 0, 0, (1, 0), (0, 0), (0, 0), data)
+        track = [event]
+
+        seq = Seq()
+        seq.names = ['name']
+        seq.tags = 'tags'
+        seq.tracks = [track]
+        print(seq.info())
+
 
 if __name__ == '__main__':
     unittest.main()
