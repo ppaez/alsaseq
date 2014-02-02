@@ -192,7 +192,7 @@ class TestSeq(TestCase):
         alsamidi.print.assert_called_with(*args)
 
 
-class SeqReadWrite(TestCase):
+class SeqRead(TestCase):
 
     def setUp(self):
         try:
