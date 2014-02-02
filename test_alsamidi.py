@@ -1,3 +1,4 @@
+from __future__ import print_function
 from unittest import TestCase
 
 
@@ -154,6 +155,20 @@ class UniqueNotes(TestCase):
 
 class TestSeq(TestCase):
 
+    def setUp(self):
+        try:
+            from mock import Mock
+        except:
+            from unittest.mock import Mock
+        import alsamidi
+
+        alsamidi.print = Mock()
+
+    def  tearDown(self):
+        import alsamidi
+
+        del alsamidi.print
+
     def test_instance(self):
         from alsamidi import Seq
 
@@ -161,6 +176,7 @@ class TestSeq(TestCase):
 
     def test_info(self):
         from alsamidi import Seq
+        import alsamidi
 
         data = (9, 60, 127, 0, 10)
         event = (5, 1, 0, 0, (1, 0), (0, 0), (0, 0), data)
@@ -170,7 +186,10 @@ class TestSeq(TestCase):
         seq.names = ['name']
         seq.tags = 'tags'
         seq.tracks = [track]
-        print(seq.info())
+        seq.info()
+        alsamidi.print.assert_any_call('tags')
+        args = '0:', 'name           ', 0, 'Sec.', 1, 'events,', {9: [60]}, 'Hi Bongo'
+        alsamidi.print.assert_called_with(*args)
 
 
 class SeqReadWrite(TestCase):
