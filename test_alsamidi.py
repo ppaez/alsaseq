@@ -208,10 +208,13 @@ class SeqReadWrite(TestCase):
         self.file.readlines.return_value = text.split('\n')
         alsamidi.open = Mock(return_value=self.file)
 
+        alsamidi.print = Mock()
+
     def  tearDown(self):
         import alsamidi
 
         del alsamidi.open
+        del alsamidi.print
 
     def test_read(self):
         from alsamidi import Seq
@@ -229,6 +232,14 @@ class SeqReadWrite(TestCase):
         seq = Seq()
         seq.read('path')
         self.assertEqual(['Default'], seq.names)
+
+    def test_error(self):
+        from alsamidi import Seq
+        import alsamidi
+
+        alsamidi.open.side_effect = IOError
+        seq = Seq()
+        seq.read('path')
 
 
 if __name__ == '__main__':
