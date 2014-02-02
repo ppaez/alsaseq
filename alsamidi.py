@@ -167,16 +167,12 @@ def modifyevents( events, timedelta=0, ch=0, dest=0, source=0, queue=0, keydelta
         dest, source, queue, keydelta ) )
     return modifiedevents
 
-
-def bytimestamp( a, b ):
-    return cmp( a[4], b[4] )
-
 def merge( tracks ):
     'Return one or more tracks joined and sorted into a single track.'
     singletrack = []
     for track in tracks:
         singletrack.extend( track )
-    singletrack.sort( bytimestamp ) # order by timestamp
+    singletrack.sort(key=lambda e: e[4]) # order by timestamp
     return singletrack
 
 def uniquenotes( events ):
