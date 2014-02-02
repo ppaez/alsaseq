@@ -242,5 +242,68 @@ class SeqRead(TestCase):
         seq.read('path')
 
 
+class SeqWrite(TestCase):
+
+    def setUp(self):
+        try:
+            from mock import Mock
+        except:
+            from unittest.mock import Mock
+        import alsamidi
+
+        self.file = Mock()
+        alsamidi.open = Mock(return_value=self.file)
+
+        alsamidi.print = Mock()
+
+    def  tearDown(self):
+        import alsamidi
+
+        del alsamidi.open
+        del alsamidi.print
+
+    def test_write(self):
+        from alsamidi import Seq
+
+        data = (9, 60, 127, 0, 10)
+        event = (5, 1, 0, 0, (1, 0), (0, 0), (0, 0), data)
+        track = [event]
+
+        seq = Seq()
+        seq.names = ['name']
+        seq.tags = {'name': 'value'}
+        seq.orderedtags = ['name']
+        seq.tracks = [track]
+
+        seq.write('path')
+        line = '5,1,0,0,1 0,0 0,0 0,9 60 127 0 10\n'
+        self.file.write.assert_called_with(line)
+
+    def test_write_no_name(self):
+        from alsamidi import Seq
+
+        data = (9, 60, 127, 0, 10)
+        event = (5, 1, 0, 0, (1, 0), (0, 0), (0, 0), data)
+        track = [event]
+
+        seq = Seq()
+        seq.names = []
+        seq.tags = {'name': 'value'}
+        seq.orderedtags = ['name']
+        seq.tracks = [track]
+
+        seq.write('path')
+        line = '5,1,0,0,1 0,0 0,0 0,9 60 127 0 10\n'
+        self.file.write.assert_called_with(line)
+
+    def test_error(self):
+        from alsamidi import Seq
+        import alsamidi
+
+        alsamidi.open.side_effect = IOError
+        seq = Seq()
+        seq.write('path')
+
+
 if __name__ == '__main__':
     unittest.main()
