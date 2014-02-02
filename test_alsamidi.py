@@ -173,5 +173,44 @@ class TestSeq(TestCase):
         print(seq.info())
 
 
+class SeqReadWrite(TestCase):
+
+    def setUp(self):
+        try:
+            from mock import Mock
+        except:
+            from unittest.mock import Mock
+        import alsamidi
+
+        self.file = Mock()
+        text = 'track melody\n' \
+               '6,1,0,1,2 5430786,20 0,130 0,1 108 82 0 0\n' \
+               'name = value'
+        self.file.readlines.return_value = text.split('\n')
+        alsamidi.open = Mock(return_value=self.file)
+
+    def  tearDown(self):
+        import alsamidi
+
+        del alsamidi.open
+
+    def test_read(self):
+        from alsamidi import Seq
+
+        seq = Seq()
+        seq.read('path')
+        self.assertEqual(['track melody'], seq.names)
+
+    def test_read_default_track(self):
+        from alsamidi import Seq
+
+        text = '6,1,0,1,2 5430786,20 0,130 0,1 108 82 0 0'
+
+        self.file.readlines.return_value = text.split('\n')
+        seq = Seq()
+        seq.read('path')
+        self.assertEqual(['Default'], seq.names)
+
+
 if __name__ == '__main__':
     unittest.main()
