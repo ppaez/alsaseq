@@ -262,27 +262,28 @@ class Seq:
         'Write the tracks to ALSACSV file.'
         try:
             f = open( path, 'w' )
-            tags = self.tags
-            names = self.names
-            if tags:
-                for tag in self.orderedtags:
-                    f.write( tag + '=' + tags[ tag ] + '\n' )
-            for track in self.tracks:
-                names = names + [''] * ( len(self.tracks) - len(names) )
-                name = names[ self.tracks.index( track ) ]
-                if name:
-                    f.write( name + '\n' )
-                else:
-                    f.write( 'track\n' )
-                for event in track:
-                    l = []
-                    for field in event:
-                        if isinstance( field, int ):
-                            l.append( str( field ) )
-                        else:
-                            l.append( ' '.join( map( str, field )) )
-                    f.write( ','.join( l ) + '\n' )
         except:
             print('Error saving file', path)
             print(sys.exc_info()[1])
+            return
 
+        tags = self.tags
+        names = self.names
+        if tags:
+            for tag in self.orderedtags:
+                f.write( tag + '=' + tags[ tag ] + '\n' )
+        for track in self.tracks:
+            names = names + [''] * ( len(self.tracks) - len(names) )
+            name = names[ self.tracks.index( track ) ]
+            if name:
+                f.write( name + '\n' )
+            else:
+                f.write( 'track\n' )
+            for event in track:
+                l = []
+                for field in event:
+                    if isinstance( field, int ):
+                        l.append( str( field ) )
+                    else:
+                        l.append( ' '.join( map( str, field )) )
+                f.write( ','.join( l ) + '\n' )

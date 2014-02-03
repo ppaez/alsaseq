@@ -1,5 +1,7 @@
 *.tox
 *.pyc
 *egg*
+*.swp
+.coverage
 MANIFEST
 build/
