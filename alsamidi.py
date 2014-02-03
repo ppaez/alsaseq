@@ -227,29 +227,32 @@ class Seq:
         orderedtags = []
         try:
             f = open( path )
-            for line in f.readlines():
-              if line[-1] == '\n': line = line[ :-1 ]
-              if '=' in line:
-                variable, valor = list(map( string.strip, line.split( '=' ) ))
-                tags[ variable ] = valor
-                orderedtags.append( variable )
-              elif 'track' in line:
-                names.append( line )
-                tracks.append( [] )
-              elif line:
-                if not tracks:
-                    tracks.append( [] )
-                    names.append( 'Default' )
-                campos = []
-                for c in line.split( ',' ):
-                    try:
-                        campos.append( int(c) )
-                    except:
-                        campos.append( tuple( map( int, c.split() ) ) )
-                tracks[ -1 ].append( tuple( campos ) )
         except:
             print('Error reading file', path)
             print(sys.exc_info()[1])
+            return
+
+        for line in f.readlines():
+          if line[-1] == '\n': line = line[ :-1 ]
+          if '=' in line:
+            variable, valor = list(map( string.strip, line.split( '=' ) ))
+            tags[ variable ] = valor
+            orderedtags.append( variable )
+          elif 'track' in line:
+            names.append( line )
+            tracks.append( [] )
+          elif line:
+            if not tracks:
+                tracks.append( [] )
+                names.append( 'Default' )
+            campos = []
+            for c in line.split( ',' ):
+                try:
+                    campos.append( int(c) )
+                except:
+                    campos.append( tuple( map( int, c.split() ) ) )
+            tracks[ -1 ].append( tuple( campos ) )
+
         self.names = names
         self.tracks = tracks
         self.tags = tags
