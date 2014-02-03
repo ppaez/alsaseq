@@ -228,7 +228,7 @@ class Seq:
         try:
             f = open( path )
         except:
-            print('Error reading file', path)
+            print('Error opening file', path)
             print(sys.exc_info()[1])
             return
 
@@ -263,7 +263,7 @@ class Seq:
         try:
             f = open( path, 'w' )
         except:
-            print('Error saving file', path)
+            print('Error opening file', path)
             print(sys.exc_info()[1])
             return
 
