@@ -235,7 +235,7 @@ class Seq:
         for line in f.readlines():
           if line[-1] == '\n': line = line[ :-1 ]
           if '=' in line:
-            variable, valor = list(map( string.strip, line.split( '=' ) ))
+            variable, valor = list(map(lambda s: s.strip, line.split( '=' )))
             tags[ variable ] = valor
             orderedtags.append( variable )
           elif 'track' in line:
