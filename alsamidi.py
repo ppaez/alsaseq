@@ -242,16 +242,16 @@ class Seq:
         if tags:
             print(tags)
         for i, track in enumerate(tracks):
-          if track:
-            inicio = track[0][4][0]
-            final = track[-1][4][0]
-            druminsts = []
-            if list(uniquenotes(track).keys()) == [9]:
-                for drumnumber in uniquenotes(track)[9]:
-                    druminsts.append(drumnames[int(drumnumber)])
-            print(str(i) + ':', names[i].ljust(15), final - inicio,
-                  'Sec.', len(track), 'events,', uniquenotes(track),
-                  ','.join(druminsts))
+            if track:
+                inicio = track[0][4][0]
+                final = track[-1][4][0]
+                druminsts = []
+                if list(uniquenotes(track).keys()) == [9]:
+                    for drumnumber in uniquenotes(track)[9]:
+                        druminsts.append(drumnames[int(drumnumber)])
+                print(str(i) + ':', names[i].ljust(15), final - inicio,
+                      'Sec.', len(track), 'events,', uniquenotes(track),
+                      ','.join(druminsts))
 
     def read(self, path):
         'Read data from ALSACSV file.'
