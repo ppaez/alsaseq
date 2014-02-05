@@ -4,9 +4,9 @@ from __future__ import print_function
 
 import alsaseq, alsamidi, sys
 
-def main(dest_client, ruta, display=False):
+def main(dest_client, file_name, display=False):
     seq = alsamidi.Seq()
-    seq.read( ruta )
+    seq.read( file_name )
     events = alsamidi.merge( seq.tracks )
     seq.info()
 
@@ -29,9 +29,9 @@ def main(dest_client, ruta, display=False):
 
 if __name__ == '__main__':
     dest_client = int( sys.argv[1] )
-    ruta = sys.argv[2]
+    file_name = sys.argv[2]
     if len(sys.argv) > 3:
         display = sys.argv[3]
     else:
         display = ''
-    main(dest_client, ruta, display)
+    main(dest_client, file_name, display)
