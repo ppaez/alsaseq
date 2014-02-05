@@ -3,14 +3,7 @@
 
 import alsaseq, alsamidi, sys
 
-def main():
-    dest_cliente = int( sys.argv[1] )
-    ruta = sys.argv[2]
-    if len(sys.argv) > 3:
-        display = sys.argv[3]
-    else:
-        display = ''
-
+def main(dest_cliente, ruta, display=False):
     seq = alsamidi.Seq()
     seq.read( ruta )
     eventos = alsamidi.merge( seq.tracks )
@@ -34,4 +27,10 @@ def main():
     # time.sleep( delay )
 
 if __name__ == '__main__':
-    main()
+    dest_cliente = int( sys.argv[1] )
+    ruta = sys.argv[2]
+    if len(sys.argv) > 3:
+        display = sys.argv[3]
+    else:
+        display = ''
+    main(dest_cliente, ruta, display)
