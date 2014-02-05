@@ -1,3 +1,4 @@
+from __future__ import print_function
 import unittest
 
 
@@ -13,12 +14,16 @@ class Main(unittest.TestCase):
         alsamidi.merge = Mock(return_value=[])
         self.Seq = alsamidi.Seq
         alsamidi.Seq = Mock()
+        import aseqplay
+        aseqplay.print = Mock()
 
     def tearDown(self):
         import alsamidi
+        import aseqplay
 
         alsamidi.merge = self.merge
         alsamidi.Seq = self.Seq
+        del aseqplay.print
 
     def test(self):
         import aseqplay
