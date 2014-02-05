@@ -1,6 +1,4 @@
 from __future__ import print_function
-#! /usr/bin/python
-# -*- coding: UTF-8 -*-
 
 import sys
 import alsaseq
@@ -22,14 +20,12 @@ def main(dest_client, file_name, display=False):
 
     alsaseq.start()
 
-    #events = alsamidi.modifyevents( events, source = ( 20, 0 ) )
     for event in events:
         if display:
             print(event)
         alsaseq.output(event)
 
     alsaseq.syncoutput()
-    # time.sleep( delay )
 
 if __name__ == '__main__':
     dest_client = int(sys.argv[1])
