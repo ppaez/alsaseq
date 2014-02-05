@@ -205,7 +205,9 @@ class SeqRead(TestCase):
         text = 'track melody\n' \
                '6,1,0,1,2 5430786,20 0,130 0,1 108 82 0 0\n' \
                'name = value'
-        self.file.readlines.return_value = text.split('\n')
+        lines = text.split('\n')
+        self.file.readlines.return_value = lines
+        lines[0] = lines[0] + '\n'
         alsamidi.open = Mock(return_value=self.file)
 
         alsamidi.print = Mock()
