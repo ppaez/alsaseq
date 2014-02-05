@@ -11,11 +11,14 @@ class Main(unittest.TestCase):
         import alsamidi
         self.merge = alsamidi.merge
         alsamidi.merge = Mock(return_value=[])
+        self.Seq = alsamidi.Seq
+        alsamidi.Seq = Mock()
 
     def tearDown(self):
         import alsamidi
 
         alsamidi.merge = self.merge
+        alsamidi.Seq = self.Seq
 
     def test(self):
         import aseqplay
