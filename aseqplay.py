@@ -1,3 +1,4 @@
+from __future__ import print_function
 #! /usr/bin/python
 # -*- coding: UTF-8 -*-
 
@@ -9,7 +10,7 @@ def main(dest_cliente, ruta, display=False):
     eventos = alsamidi.merge( seq.tracks )
     seq.info()
 
-    print len( eventos ), 'eventos'
+    print(len( eventos ), 'eventos')
     alsaseq.client( 'Reproductor', 0, 1, 1 )
     alsaseq.connectto( 0, dest_cliente, 0 )
 
@@ -20,7 +21,7 @@ def main(dest_cliente, ruta, display=False):
 
     #eventos = alsamidi.modifyevents( eventos, source = ( 20, 0 ) )
     for evento in eventos:
-        if display: print evento
+        if display: print(evento)
         alsaseq.output( evento )
 
     alsaseq.syncoutput()
