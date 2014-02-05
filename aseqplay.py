@@ -4,34 +4,34 @@ from __future__ import print_function
 
 import alsaseq, alsamidi, sys
 
-def main(dest_cliente, ruta, display=False):
+def main(dest_client, ruta, display=False):
     seq = alsamidi.Seq()
     seq.read( ruta )
-    eventos = alsamidi.merge( seq.tracks )
+    events = alsamidi.merge( seq.tracks )
     seq.info()
 
-    print(len( eventos ), 'eventos')
-    alsaseq.client( 'Reproductor', 0, 1, 1 )
-    alsaseq.connectto( 0, dest_cliente, 0 )
+    print(len( events ), 'events')
+    alsaseq.client( 'aseqplay', 0, 1, 1 )
+    alsaseq.connectto( 0, dest_client, 0 )
 
     for channel in range( 16 ):
         alsaseq.output( alsamidi.pgmchangeevent( channel, 0 ) )
 
     alsaseq.start()
 
-    #eventos = alsamidi.modifyevents( eventos, source = ( 20, 0 ) )
-    for evento in eventos:
-        if display: print(evento)
-        alsaseq.output( evento )
+    #events = alsamidi.modifyevents( events, source = ( 20, 0 ) )
+    for event in events:
+        if display: print(event)
+        alsaseq.output( event )
 
     alsaseq.syncoutput()
     # time.sleep( delay )
 
 if __name__ == '__main__':
-    dest_cliente = int( sys.argv[1] )
+    dest_client = int( sys.argv[1] )
     ruta = sys.argv[2]
     if len(sys.argv) > 3:
         display = sys.argv[3]
     else:
         display = ''
-    main(dest_cliente, ruta, display)
+    main(dest_client, ruta, display)
