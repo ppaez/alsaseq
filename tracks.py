@@ -210,7 +210,7 @@ try:
     playback()
 
     while letra != 'q':
-        letra = kbhit.getch()
+        letra = kbhit.getch().decode()
         parsecommand()
 
 except:
