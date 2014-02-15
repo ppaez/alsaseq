@@ -31,7 +31,7 @@ timbres = { 'TaikoDrum': ( 1, 116, 60 ),
 
 
 def lee( archivo ):
-    'Lee uno o m·s ritmos de archivo.'
+    'Lee uno o m√°s ritmos de archivo.'
     ritmos = []
 
     lines = open( archivo ).read().split( '\n' )
