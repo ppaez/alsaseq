@@ -6,7 +6,7 @@ import alsamidi, re, sys
 def CanalPgmyNota( timbre ):
     'Convierte nombre a canal, pgmchange y nota .'
     timbre = timbre.replace( ' ', '' )
-    if timbres.has_key( timbre ):
+    if timbre in timbres:
         return timbres[ timbre ]
     else:
         return 9, 0, int( timbre )
@@ -66,7 +66,7 @@ def construye( ritmo, tempo, compases, start=0 ):
     tbeat = int( 60. / tempo * 1000 )
     numerador = ritmo[ 1 ][ 0 ]
     numbeats = ritmo[ 1 ][ 1]
-    inicios = map( itotiempo, range( numbeats * compases ) )
+    inicios = list(map( itotiempo, list(range( numbeats * compases)) ))
     duracion = int( tbeat * 0.9 )
     instrumentos = ritmo[ 2 ]
     
@@ -93,7 +93,7 @@ def main():
     archivo = sys.argv[2]
     trios = []
     for e in sys.argv[3:]:
-        n, tempo, compases = map( int, e.split() )
+        n, tempo, compases = list(map( int, e.split() ))
         trios.append( ( n, tempo, compases ) )
 
     import alsaseq
@@ -109,7 +109,7 @@ def main():
         alsaseq.syncoutput()
 
     ritmos = lee( archivo )
-    print len(ritmos), 'ritmos:', map( lambda x: x[0], ritmos )
+    print(len(ritmos), 'ritmos:', [x[0] for x in ritmos])
 
     eventos = []
     end = 0
@@ -117,7 +117,7 @@ def main():
         n, tempo, compases = trio
         ritmo = ritmos [ n ]
         eventos.extend( construye( ritmo, tempo, compases, end ) )
-        print str( end ).rjust( 5 ), str( compases ).rjust( 3 ), ritmo[ 0 ]
+        print(str( end ).rjust( 5 ), str( compases ).rjust( 3 ), ritmo[ 0 ])
         end = end + compases * int( 60. / tempo * 1000 ) * ritmo[1][0]
 
     play( eventos )
