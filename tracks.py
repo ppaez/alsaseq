@@ -23,15 +23,12 @@ nritmo = 0; tempo = 80; compases = 1
 playing = False
 letra = ''
 
-def bytimestamp( a, b ):
-    return cmp( a[4], b[4] )
-
 def merge( lists ):
     'Join each list in list in to one list.'
     listagral = []
     for lista in lists:
         listagral.extend( lista )
-    listagral.sort( bytimestamp ) # order by timestamp
+    listagral.sort(key=lambda e: e[4]) # order by timestamp
     return listagral
 
 
