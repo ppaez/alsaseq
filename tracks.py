@@ -3,6 +3,7 @@
 from __future__ import print_function
 import sys
 import time
+import traceback
 import threading
 import select
 
@@ -223,7 +224,7 @@ try:
         parsecommand()
 
 except:
-    print('except', sys.exc_info())
+    traceback.print_exception(*sys.exc_info())
     kbhit.restore_stdin()
     vivo = 0
 
