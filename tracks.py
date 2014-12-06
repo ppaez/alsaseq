@@ -2,10 +2,6 @@
 
 from __future__ import print_function
 
-__version__ = '2'
-
-'Do not fill queue.'
-
 import alsaseq, sys, time, threading, alsamidi, select, pista
 
 waitingforsplit = 0; split = 0
