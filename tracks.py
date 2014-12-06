@@ -1,8 +1,15 @@
 # -*- coding: UTF-8 -*-
 
 from __future__ import print_function
+import sys
+import time
+import threading
+import select
 
-import alsaseq, sys, time, threading, alsamidi, select, pista
+import alsaseq
+import alsamidi
+import pista
+
 
 waitingforsplit = 0; split = 0
 source_cliente = int( sys.argv[1] )
@@ -19,6 +26,7 @@ ritmos = []
 nritmo = 0; tempo = 80; compases = 1
 playing = False
 letra = ''
+
 
 def merge( lists ):
     'Join each list in list in to one list.'
@@ -52,6 +60,7 @@ def supplyoutput():
                 eventos = []
     time.sleep( 0.5 ) 
   print('Terminando supplyoutput()')
+
 
 def retrieveinput():
     'Retrieve received events.'
@@ -103,6 +112,7 @@ def playback():
     print('playing')
     print(seq.info())
 
+
 def stop():
     'Stop playing of events.'
     global playing, incoming
@@ -116,6 +126,7 @@ def stop():
         incoming = []
     print('stopped')
     print(len(tracks), 'tracks')
+
 
 def drums( ritmo, tempo, compases ):
     'Output one measure to queue.'
@@ -131,6 +142,7 @@ def drums( ritmo, tempo, compases ):
     for evento in t:
         alsaseq.output( evento )
         incoming.append( evento ) # record it
+
 
 def parsecommand():
     'Read on letter from stdin.'
