@@ -8,20 +8,6 @@ well as the voice on each channel.  The user can pause the
 sequencer, save the events to a file and some other basic
 actions.
 
-Uses the threading module to create two threads that handle ALSA
-sequencer events: One fetches events received by the sequencer,
-the other sends events to the sequencer.
-
-The receiving thread uses select.poll() to check if there are
-input events.
-
-kbhit by Tim Bird is used to get commands from the user, in the
-form of single characters.
-
-The drums() function generates events for the next measure of
-a loop.  It uses an ALSA echo event to trigger itself shortly
-before the next measure needs to be scheduled again.
-
 The command-line parameters are::
 
   python tracks.py source destination voice1 voice2 split path
@@ -63,3 +49,20 @@ The following commands are available when in stop mode:
 - `b` enter voice 2
 
 `q` ends the program.
+
+Implementation
+==============
+
+tracks uses the threading module to create two threads that handle ALSA
+sequencer events: One fetches events received by the sequencer,
+the other sends events to the sequencer.
+
+The receiving thread uses select.poll() to check if there are
+input events.
+
+kbhit by Tim Bird is used to get commands from the user, in the
+form of single characters.
+
+The drums() function generates events for the next measure of
+a loop.  It uses an ALSA echo event to trigger itself shortly
+before the next measure needs to be scheduled again.
