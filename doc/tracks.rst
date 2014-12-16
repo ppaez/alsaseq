@@ -1,10 +1,10 @@
 tracks
 ======
 
-tracks is a simple sequencer that uses alsaseq.  It can record
+tracks is a simple sequencer that uses the alsaseq module.  It can record
 and playback one or more tracks. The input note range is split
 in two channels by default. The split note can be changed, as
-well as the voice on each channel.  The use can pause the
+well as the voice on each channel.  The user can pause the
 sequencer, save the events to a file and some other basic
 actions.
 
@@ -20,16 +20,17 @@ form of single characters.
 
 The drums() function generates events for the next measure of
 a loop.  It uses an ALSA echo event to trigger itself shortly
-before the next measure needs to be schedule again.
+before the next measure needs to be scheduled again.
 
 The command-line parameters are::
 
   python tracks.py source destination voice1 voice2 split path
 
-The meaning of each parameter:
+The meaning of each parameter is:
+
     - source ALSA client number,
-      events are received from this devic.
-    - destination ALSA client numbre,
+      events are received from this device.
+    - destination ALSA client number,
       events are sent to this device.
     - voice 1 General MIDI instrument number
     - voice 2 General MIDI instrument number
