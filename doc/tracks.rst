@@ -29,8 +29,14 @@ An example command line::
 
 
 When the program starts, it is in playback mode and will
-reproduce the events in the input file.  The following
-commands are available in playback mode:
+reproduce the events in the input file.  Incoming events
+are recorded and sent to the destination ALSA client
+using MIDI channel 0.
+Incoming notes equal to or below the split note, are
+recorded and sent to the destination ALSA client
+using MIDI channel 1.
+
+The following commands are available in playback mode:
 
 - `p` stop
 - `r` read pattern file `main.pat`
