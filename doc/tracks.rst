@@ -2,12 +2,14 @@
 tracks
 ======
 
-tracks is a simple sequencer that uses the alsaseq module.  It can record
+tracks is a simple sequencer that uses the `alsaseq`__ module.  It can record
 and playback one or more tracks. The input note range is split
 in two channels by default. The split note can be changed, as
 well as the voice on each channel.  The user can pause the
 sequencer, save the events to a file and some other basic
 actions.
+
+__ https://github.com/ppaez/alsaseq
 
 Running
 =======
@@ -90,16 +92,23 @@ change takes effect on the next measure.
 Implementation
 ==============
 
-tracks uses the threading module to create two threads that handle ALSA
+tracks uses the `threading`__ module to create two threads that handle ALSA
 sequencer events: One fetches events received by the sequencer,
 the other sends events to the sequencer.
 
-The receiving thread uses select.poll() to check if there are
+The receiving thread uses poll() in the `select`__ module to check if there are
 input events.
 
-kbhit by Tim Bird is used to get commands from the user, in the
+The `kbhit`__ module by Tim Bird is used to get commands from the user, in the
 form of single characters.
 
 The drums() function generates events for the next measure of
-a loop.  It uses an ALSA echo event to trigger itself shortly
-before the next measure needs to be scheduled again.
+a loop.  It uses an `ALSA echo event`__ to trigger itself shortly
+before the next measure needs to be scheduled again.  It uses
+the `pista`__ module.
+
+__ https://docs.python.org/3/library/threading.html
+__ https://docs.python.org/3/library/select.html
+__ https://groups.google.com/forum/#!topic/comp.lang.python/rGIpVDmIpOU
+__ http://alsa-project.org/alsa-doc/alsa-lib/group___seq_events.html#ggaef39e1f267006faf7abc91c3cb32ea40a71cd073dbeb98982d8b094ab6d841376
+__ https://github.com/ppaez/alsaseq/blob/master/pista.py
