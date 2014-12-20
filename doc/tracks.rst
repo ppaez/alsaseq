@@ -1,3 +1,4 @@
+======
 tracks
 ======
 
@@ -8,6 +9,8 @@ well as the voice on each channel.  The user can pause the
 sequencer, save the events to a file and some other basic
 actions.
 
+Running
+=======
 The command-line parameters are::
 
   python tracks.py source destination voice1 voice2 split path
@@ -27,6 +30,13 @@ An example command line::
 
   python tracks.py 128 129 1 50 59 file.seq
 
+Events are received from client 128, events are sent to
+client 129, the first voice is piano on channel 0, the
+second voice is string ensemble on channel 1, the
+split note is B3, and file.seq is the sequence file.
+
+Operation
+=========
 
 When the program starts, it is in playback mode and will
 reproduce the events in the input file.  Incoming events
