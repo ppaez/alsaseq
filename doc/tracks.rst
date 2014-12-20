@@ -94,6 +94,24 @@ change takes effect on the next measure.
 Implementation
 ==============
 
+tracks uses the `alsamidi`__ module to read the sequence file, using an
+instance of the Seq class.  The `tracks` attribute of the instance is a list
+of tracks, each track is a sequence of ALSA sequencer events.  The `tracks`
+list is loaded with the events that are read from the sequence file at
+the start of the program, or when the `o` command is used.
+
+tracks keeps two lists of ALSA sequencer events:
+
+    - `incoming`, the events received from the source client.
+      It is cleared when playback mode is entered.  When stop mode
+      is entered, one or two voice change events are added at the
+      beginning, and its contents are appended to the `tracks` list.
+
+    - `eventos`, the events that will be sent to the destination
+      client.  It is set to the contents of all the tracks in the `tracks`
+      list when playback mode is entered.  The `tracks` list is first
+      processed by `merge` to become a single event list.
+
 tracks uses the `threading`__ module to create two threads that handle ALSA
 sequencer events: One fetches events received by the sequencer,
 the other sends events to the sequencer.
@@ -109,6 +127,7 @@ a loop.  It uses an `ALSA echo event`__ to trigger itself shortly
 before the next measure needs to be scheduled again.  It uses
 the `pista`__ module.
 
+__ https://github.com/ppaez/alsaseq/blob/master/alsamidi.py
 __ https://docs.python.org/3/library/threading.html
 __ https://docs.python.org/3/library/select.html
 __ https://groups.google.com/forum/#!topic/comp.lang.python/rGIpVDmIpOU
