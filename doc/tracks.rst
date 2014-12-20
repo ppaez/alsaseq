@@ -118,16 +118,41 @@ threads:
 
     - `thri`, runs `retrieveinput`
 
-        - fetches events received by the sequencer and adds
-          them to the `incoming` list
+        - discards events with a type as those
+          in the `rechazados` list
+
+        - if an ALSA sequencer echo event is received,
+          call  drums() to create and schedule the next
+          rhythm measure
+
+        - if the `k` split command was issued, use the
+          note value of the current ALSA sequencer event
+          as the keyboard split point, and discard the
+          event
+
+        - if there is not split note is 0, output the
+          event and add it to the `incoming` list with
+          channels 0 and 1
+
+        - if the split point is not 0,
+
+            - if the note is greater than the split note,
+              output the event and add it to the `incoming`
+              list with channel 0
+
+            - if the note is equal to or less than the split
+              note, output the event and add it to the
+              `incoming` list with channel 1
 
     - `thso`, runs `supplyoutput`
 
         - sinks events from the `eventos` list and schedules
           them to the sequencer
 
-The receiving thread uses poll() in the `select`__ module to check if there are
-input events.
+The receiving thread uses poll() in the `select`__ module to wait until
+there are input events.  The ALSA sequencer file descriptor is obtained
+using `alsaseq.fd()`, it is registered for input events, and then on each
+loop, the file descriptor is polled for input, with a timeout of 5 seconds.
 
 Both threads are started at the beginning of the program execution.  They are
 ended after the `q` command is used, when the main program will end, by
