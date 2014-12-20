@@ -114,12 +114,25 @@ tracks keeps two lists of ALSA sequencer events:
 
 tracks uses the `threading`__ module to populate the `incoming`
 and `eventos` lists with ALSA sequencer events.  It creates two
-threads: one fetches events received by the sequencer and adds
-them to `incoming`, the other schedules the pending events in
-`eventos` to the sequencer.
+threads:
+
+    - `thri`, runs `retrieveinput`
+
+        - fetches events received by the sequencer and adds
+          them to the `incoming` list
+
+    - `thso`, runs `supplyoutput`
+
+        - sinks events from the `eventos` list and schedules
+          them to the sequencer
 
 The receiving thread uses poll() in the `select`__ module to check if there are
 input events.
+
+Both threads are started at the beginning of the program execution.  They are
+ended after the `q` command is used, when the main program will end, by
+setting the `vivo` variable to 0.
+
 
 The `kbhit`__ module by Tim Bird is used to get commands from the user, in the
 form of single characters.
