@@ -66,6 +66,27 @@ The following commands are available when in stop mode:
 
 `q` ends the program.
 
+Rhythm Loops
+============
+
+A basic mechanism to play percussion sounds in a loop with is
+available.  It is based on a text file `main.path` that stores
+sequences.  Each sequence has a name and a track for each
+instrument.  A track is stored in a row in the file; the row
+includes the time subdivisions per measure, showing on which
+subdivisions an instrument is played, the instrument name, and
+the velocity.
+
+The first sequence in the file is chosen as default, but it can
+be changed during playback by pressing a number key or entering
+the number with the `n` command.  The change takes effect on the
+next measure.
+
+The tempo for the loop is set to 80 by default, it can be
+changed by entering a new value with the `t` command.  Then
+change takes effect on the next measure.
+
+
 Implementation
 ==============
 
