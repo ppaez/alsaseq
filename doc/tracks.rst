@@ -112,9 +112,11 @@ tracks keeps two lists of ALSA sequencer events:
       list when playback mode is entered.  The `tracks` list is first
       processed by `merge` to become a single event list.
 
-tracks uses the `threading`__ module to create two threads that handle ALSA
-sequencer events: One fetches events received by the sequencer,
-the other sends events to the sequencer.
+tracks uses the `threading`__ module to populate the `incoming`
+and `eventos` lists with ALSA sequencer events.  It creates two
+threads: one fetches events received by the sequencer and adds
+them to `incoming`, the other schedules the pending events in
+`eventos` to the sequencer.
 
 The receiving thread uses poll() in the `select`__ module to check if there are
 input events.
