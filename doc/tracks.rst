@@ -2,7 +2,9 @@
 tracks
 ======
 
-tracks is a simple sequencer that uses the `alsaseq`__ module.  It can record
+tracks is a simple command-line MIDI sequencer for GNU/Linux
+that uses the modules
+from the `alsaseq`__ project.  It can record
 and playback one or more tracks. The input note range is split
 in two channels by default. The split note can be changed, as
 well as the voice on each channel.  The user can pause the
