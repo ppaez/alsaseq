@@ -169,16 +169,17 @@ def parsecommand():
             stop()
         elif letra == 'r':
             ritmos = pista.lee( 'main.pat' )
-            print([x[0] for x in ritmos])
+            for i, x in enumerate(ritmos):
+                print('{:2} {}'.format(i, x[0]))
             drums( ritmos[ nritmo ], tempo, compases )
         elif letra in '0123456789':
             nritmo = int( letra )
-            print(ritmos[ nritmo ][0])
+            print('{:2} {}'.format(nritmo, ritmos[nritmo][0]))
         elif letra == 'n':
             number = int( input() )
             if number < len( ritmos ):
                 nritmo = number
-                print(ritmos[ nritmo ][0])
+                print('{:2} {}'.format(nritmo, ritmos[nritmo][0]))
         elif letra == 't':
             number = int( input() )
             tempo = number
