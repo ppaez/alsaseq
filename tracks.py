@@ -20,7 +20,7 @@ voz2 = int( sys.argv[4] )
 split = int( sys.argv[5] )
 ruta = sys.argv[6]
 
-eventos = []
+outgoing = []
 incoming = []
 ritmos = []
 nritmo = 0; tempo = 80; compases = 1
@@ -39,25 +39,25 @@ def merge( lists ):
 
 def supplyoutput():
   'Supply events to the sequencer.'
-  global eventos
+  global outgoing
   while vivo:
     enfila = alsaseq.status()[2]
-    if enfila < 250 and eventos:
+    if enfila < 250 and outgoing:
         print(enfila, 'eventos en fila')
-        print(len( eventos ), 'eventos tenemos.')
+        print(len( outgoing ), 'eventos tenemos.')
         print(500 - enfila, 'eventos pueden enviarse')
         nenviar = 500 - enfila - nlibres
         print(nlibres, 'eventos se envían')
-        if len( eventos ) > nlibres:
+        if len(outgoing) > nlibres:
             print(nlibres, 'eventos se envían.')
-            for evento in eventos[ :nlibres ]:
+            for evento in outgoing[ :nlibres ]:
                 alsaseq.output( evento )
-            eventos = eventos[ nlibres : ]
+            outgoing = outgoing[ nlibres : ]
         else:
-            print(len( eventos ), 'eventos restantes se envían.')
-            for evento in eventos:
+            print(len(outgoing), 'eventos restantes se envían.')
+            for evento in outgoing:
                 alsaseq.output( evento )
-                eventos = []
+                outgoing = []
     time.sleep( 0.5 ) 
   print('Terminando supplyoutput()')
 
@@ -103,11 +103,11 @@ def retrieveinput():
 
 def playback():
     'Start playing events.'
-    global playing, eventos, incoming
+    global playing, outgoing, incoming
     playing = True
     incoming = []
-    eventos = merge(seq.tracks)
-    #eventos = alsamidi.modifyevents( eventos, source=(20,1) )
+    outgoing = merge(seq.tracks)
+    #outgoing = alsamidi.modifyevents( outgoing, source=(20,1) )
     alsaseq.start()
     print('playing')
     print(seq.info())

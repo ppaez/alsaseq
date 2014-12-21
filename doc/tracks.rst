@@ -117,13 +117,13 @@ tracks keeps two lists of ALSA sequencer events:
       is entered, one or two voice change events are added at the
       beginning, and the list is appended to the `seq.tracks` list.
 
-    - `eventos`, the events that will be sent to the destination
+    - `outgoing`, the events that will be sent to the destination
       client.  It is set to the contents of all the tracks in the `seq.tracks`
       list when playback mode is entered.  The `seq.tracks` list is first
       processed by `merge` to become a single event list.
 
 tracks uses the `threading`__ module to populate the `incoming`
-and `eventos` lists with ALSA sequencer events.  It creates two
+and `outgoing` lists with ALSA sequencer events.  It creates two
 threads:
 
     - `thri`, runs `retrieveinput`
@@ -156,7 +156,7 @@ threads:
 
     - `thso`, runs `supplyoutput`
 
-        - sinks events from the `eventos` list and schedules
+        - sinks events from the `outgoing` list and schedules
           them to the sequencer
 
 The receiving thread uses poll() in the `select`__ module to wait until
