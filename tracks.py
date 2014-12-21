@@ -146,8 +146,10 @@ def parsecommand():
             playback()
         elif letra == 'o':
             seq.read( ruta )
+            print('read', ruta)
         elif letra == 's':
             seq.write( ruta )
+            print('saved', ruta)
         elif letra == 't':
             enabledisabletracks()
         elif letra == 'k':
