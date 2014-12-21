@@ -73,7 +73,6 @@ def retrieveinput():
         if type in rechazados:
             continue # discard obnoxious Clavinova events
         elif type == alsaseq.SND_SEQ_EVENT_ECHO:
-            print('echo event')
             drums( ritmos[ nritmo ], tempo, compases )
             continue
         ev = alsamidi.modifyevent( entrante, ch=1 )
@@ -131,7 +130,6 @@ def drums( ritmo, tempo, compases ):
                     alsaseq.status()[1] ) * 1000
     t = pista.construye( ritmo, tempo, compases, tiempoms)
     final = alsamidi.time2tuple( pista.duracion( ritmo, tempo, compases, tiempoms )/1000. )
-    print(final)
     t.append( (alsaseq.SND_SEQ_EVENT_ECHO, 1, 0, 0, final, (0,0), (alsaseq.id(),0), (1,2,3,4,5) ) )
     
     for evento in t:
