@@ -43,23 +43,23 @@ def supplyoutput():
   while vivo:
     enfila = alsaseq.status()[2]
     if enfila < 250 and outgoing:
-        print(enfila, 'eventos en fila')
-        print(len( outgoing ), 'eventos tenemos.')
-        print(500 - enfila, 'eventos pueden enviarse')
+        print(enfila, 'events in the ALSA sequencer queue')
+        print(len( outgoing ), 'outgoing events')
+        print(500 - enfila, 'events may be sent')
         nenviar = 500 - enfila - nlibres
-        print(nlibres, 'eventos se envían')
+        print('sending', nlibres, 'events')
         if len(outgoing) > nlibres:
-            print(nlibres, 'eventos se envían.')
+            print('sending', nlibres, 'events')
             for evento in outgoing[ :nlibres ]:
                 alsaseq.output( evento )
             outgoing = outgoing[ nlibres : ]
         else:
-            print(len(outgoing), 'eventos restantes se envían.')
+            print('sending', len(outgoing), 'remaining events')
             for evento in outgoing:
                 alsaseq.output( evento )
                 outgoing = []
     time.sleep( 0.5 ) 
-  print('Terminando supplyoutput()')
+  print('Ending supplyoutput()')
 
 
 def retrieveinput():
@@ -96,9 +96,9 @@ def retrieveinput():
         else:
             alsaseq.output( ev )
             incoming.append( ev )
-        print(len( incoming ), 'entrantes')
+        print(len( incoming ), 'incoming')
 
-    print('Terminando retrieveinput()')
+    print('Ending retrieveinput()')
 
 
 def playback():
@@ -226,6 +226,6 @@ except:
     vivo = 0
 
 kbhit.restore_stdin()
-print('fin.')
+print('End')
 vivo = 0
 #thri.join() # wait for thread to finish
