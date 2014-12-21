@@ -47,7 +47,6 @@ def supplyoutput():
         print(len( outgoing ), 'outgoing events')
         print(500 - enfila, 'events may be sent')
         nenviar = 500 - enfila - nlibres
-        print('sending', nlibres, 'events')
         if len(outgoing) > nlibres:
             print('sending', nlibres, 'events')
             for evento in outgoing[ :nlibres ]:
@@ -107,7 +106,6 @@ def playback():
     playing = True
     incoming = []
     outgoing = merge(seq.tracks)
-    #outgoing = alsamidi.modifyevents( outgoing, source=(20,1) )
     alsaseq.start()
     print('playing')
     print(seq.info())
@@ -137,7 +135,6 @@ def drums( ritmo, tempo, compases ):
     final = alsamidi.time2tuple( pista.duracion( ritmo, tempo, compases, tiempoms )/1000. )
     print(final)
     t.append( (alsaseq.SND_SEQ_EVENT_ECHO, 1, 0, 0, final, (0,0), (alsaseq.id(),0), (1,2,3,4,5) ) )
-    #t = alsamidi.modifyevents( t, source = (20, 1) )
     
     for evento in t:
         alsaseq.output( evento )
@@ -228,4 +225,3 @@ except:
 kbhit.restore_stdin()
 print('End')
 vivo = 0
-#thri.join() # wait for thread to finish
