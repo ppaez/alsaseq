@@ -101,11 +101,15 @@ start times for outgoing events.  The client will be listed as
 started when the program starts and every time that playback mode is
 entered.  It is stopped with the stop mode is entered.
 
-tracks uses the `alsamidi`__ module to read the sequence file, using an
-instance of the Seq class.  The `tracks` attribute of the instance is a list
-of tracks, each track is a sequence of ALSA sequencer events.  The `tracks`
-list is loaded with the events that are read from the sequence file at
+tracks keeps a `tracks` list.  It is a list of tracks, each track is
+is a list of ALSA sequencer events.  The list is initially empty.
+It is loaded with the events that are read from the sequence file at
 the start of the program, or when the `o` command is used.
+
+tracks uses the `alsamidi`__ module to read from and write to
+the sequence file, using an instance of the Seq class.  The
+`tracks` attribute of the instance is a list of the tracks read
+from the file or to be written to the file.
 
 tracks keeps two lists of ALSA sequencer events:
 
