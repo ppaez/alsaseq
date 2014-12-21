@@ -93,6 +93,13 @@ change takes effect on the next measure.
 
 Implementation
 ==============
+tracks uses the `alsaseq`__ module to create an ALSA sequencer client
+with one input port, one output port and a queue.  The queue marks the
+incoming events with an arrival timestamp and allows scheduling future
+start times for outgoing events.  The client will be listed as
+*ReproductorGrabador* in ALSA utilities like aconnect.  The queue is
+started when the program starts and every time that playback mode is
+entered.  It is stopped with the stop mode is entered.
 
 tracks uses the `alsamidi`__ module to read the sequence file, using an
 instance of the Seq class.  The `tracks` attribute of the instance is a list
@@ -167,6 +174,7 @@ a loop.  It uses an `ALSA echo event`__ to trigger itself shortly
 before the next measure needs to be scheduled again.  It uses
 the `pista`__ module.
 
+__ https://github.com/ppaez/alsaseq/blob/master/alsaseq.c
 __ https://github.com/ppaez/alsaseq/blob/master/alsamidi.py
 __ https://docs.python.org/3/library/threading.html
 __ https://docs.python.org/3/library/select.html
