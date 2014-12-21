@@ -22,7 +22,6 @@ ruta = sys.argv[6]
 
 eventos = []
 incoming = []
-tracks = []
 ritmos = []
 nritmo = 0; tempo = 80; compases = 1
 playing = False
@@ -107,7 +106,7 @@ def playback():
     global playing, eventos, incoming
     playing = True
     incoming = []
-    eventos = merge( tracks )
+    eventos = merge(seq.tracks)
     #eventos = alsamidi.modifyevents( eventos, source=(20,1) )
     alsaseq.start()
     print('playing')
@@ -123,10 +122,10 @@ def stop():
         incoming.insert( 0, pgmchangevoz1 )
         if voz2:
             incoming.insert( 0, pgmchangevoz2 )
-        tracks.append( incoming )
+        seq.tracks.append( incoming )
         incoming = []
     print('stopped')
-    print(len(tracks), 'tracks')
+    print(len(seq.tracks), 'tracks')
 
 
 def drums( ritmo, tempo, compases ):
@@ -147,14 +146,13 @@ def drums( ritmo, tempo, compases ):
 
 def parsecommand():
     'Read on letter from stdin.'
-    global tracks, ritmos, nritmo, tempo, split, waitingforsplit
+    global ritmos, nritmo, tempo, split, waitingforsplit
     global voz1, voz2, pgmchangevoz1, pgmchangevoz2
     if not playing:
         if letra == 'p':
             playback()
         elif letra == 'o':
             seq.read( ruta )
-            tracks = seq.tracks
         elif letra == 's':
             seq.write( ruta )
         elif letra == 't':
@@ -216,7 +214,6 @@ try:
     thri.start()
 
     seq.read( ruta )
-    tracks = seq.tracks
     playback()
 
     while letra != 'q':

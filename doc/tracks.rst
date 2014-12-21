@@ -101,26 +101,25 @@ start times for outgoing events.  The client will be listed as
 started when the program starts and every time that playback mode is
 entered.  It is stopped with the stop mode is entered.
 
-tracks keeps a `tracks` list.  It is a list of tracks, each track is
-a list of ALSA sequencer events.  The list is initially empty.
-It is made a reference to the tracks that are read from the sequence file at
-the start of the program, or when the `o` command is used.
-
 tracks uses the `alsamidi`__ module to read from and write to
-the sequence file, using an instance of the Seq class.  The
-`tracks` attribute of the instance is a list of the tracks read
-from the file or to be written to the file.
+the sequence file, using an instance `seq` of the Seq class.  The
+`seq.tracks` attribute of the instance is a list of the tracks read
+from the file or to be written to the file.  Each track is
+a list of ALSA sequencer events.  The tracks are read from
+the sequence file at the start of the program, or when the `o`
+command is used.  The tracks are written to the sequence file
+when the `s` command is used.
 
 tracks keeps two lists of ALSA sequencer events:
 
     - `incoming`, the events received from the source client.
       It is cleared when playback mode is entered.  When stop mode
       is entered, one or two voice change events are added at the
-      beginning, and its contents are appended to the `tracks` list.
+      beginning, and the list is appended to the `seq.tracks` list.
 
     - `eventos`, the events that will be sent to the destination
-      client.  It is set to the contents of all the tracks in the `tracks`
-      list when playback mode is entered.  The `tracks` list is first
+      client.  It is set to the contents of all the tracks in the `seq.tracks`
+      list when playback mode is entered.  The `seq.tracks` list is first
       processed by `merge` to become a single event list.
 
 tracks uses the `threading`__ module to populate the `incoming`
