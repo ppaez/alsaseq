@@ -154,16 +154,16 @@ def parsecommand():
             print('hit keyboard split point:', end=' ')
             waitingforsplit = 1
         elif letra == 'v':
-            number = int( input() )
-            voz1 = number
+            voz1 = int(input())
             pgmchangevoz1 = alsamidi.pgmchangeevent( 0, voz1 )
             alsaseq.output( pgmchangevoz1 )
+            print('voice 1:', voz1)
         elif letra == 'b':
-            number = int( input() )
-            voz2 = number
+            voz2 = int(input())
             pgmchangevoz2 = alsamidi.pgmchangeevent( 1, voz2 )
             if voz2:
                 alsaseq.output( pgmchangevoz2 )
+            print('voice 2:', voz2)
     else:
         if letra == 'p':
             stop()
@@ -181,8 +181,8 @@ def parsecommand():
                 nritmo = number
                 print('{:2} {}'.format(nritmo, ritmos[nritmo][0]))
         elif letra == 't':
-            number = int( input() )
-            tempo = number
+            tempo = int( input() )
+            print('tempo:', tempo)
 
 rechazados = ( alsaseq.SND_SEQ_EVENT_CLOCK, alsaseq.SND_SEQ_EVENT_SENSING )
 alsaseq.client( 'ReproductorGrabador', 1, 1, 1 )
