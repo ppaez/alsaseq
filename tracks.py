@@ -38,25 +38,25 @@ def merge( lists ):
 
 
 def supplyoutput():
-  'Supply events to the sequencer.'
-  global outgoing
-  event_tmpl = 'events: {:3} in the ALSA sequencer queue, {:3} outgoing, {:3} may be sent, {:3} sent'
-  while vivo:
-    enfila = alsaseq.status()[2]
-    if enfila < 250 and outgoing:
-        nenviar = 500 - enfila - nlibres
-        if len(outgoing) > nlibres:
-            for evento in outgoing[ :nlibres ]:
-                alsaseq.output( evento )
-            print(event_tmpl.format(enfila, len(outgoing), 500 - enfila, nlibres))
-            outgoing = outgoing[ nlibres : ]
-        else:
-            print(event_tmpl.format(enfila, len(outgoing), 500 - enfila, len(outgoing)))
-            for evento in outgoing:
-                alsaseq.output( evento )
-                outgoing = []
-    time.sleep( 0.5 ) 
-  print('Ending supplyoutput()')
+    'Supply events to the sequencer.'
+    global outgoing
+    event_tmpl = 'events: {:3} in the ALSA sequencer queue, {:3} outgoing, {:3} may be sent, {:3} sent'
+    while vivo:
+        enfila = alsaseq.status()[2]
+        if enfila < 250 and outgoing:
+            nenviar = 500 - enfila - nlibres
+            if len(outgoing) > nlibres:
+                for evento in outgoing[ :nlibres ]:
+                    alsaseq.output( evento )
+                print(event_tmpl.format(enfila, len(outgoing), 500 - enfila, nlibres))
+                outgoing = outgoing[ nlibres : ]
+            else:
+                print(event_tmpl.format(enfila, len(outgoing), 500 - enfila, len(outgoing)))
+                for evento in outgoing:
+                    alsaseq.output( evento )
+                    outgoing = []
+        time.sleep( 0.5 )
+    print('Ending supplyoutput()')
 
 
 def retrieveinput():
