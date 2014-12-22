@@ -41,6 +41,7 @@ def supplyoutput():
     'Supply events to the sequencer.'
     global outgoing
     event_tmpl = 'events: {:3} in the ALSA sequencer queue, {:3} outgoing, {:3} may be sent, {:3} sent'
+    enfila_old = 0
     while vivo:
         enfila = alsaseq.status()[2]
         if enfila < 250 and outgoing:
@@ -55,6 +56,9 @@ def supplyoutput():
                 for evento in outgoing:
                     alsaseq.output( evento )
                     outgoing = []
+        elif enfila != enfila_old:
+            print(event_tmpl.format(enfila, len(outgoing), 500 - enfila, 0))
+        enfila_old = enfila
         time.sleep( 0.5 )
     print('Ending supplyoutput()')
 
