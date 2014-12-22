@@ -53,6 +53,7 @@ SND_SEQ_QUEUE_DIRECT = 253
 
 import alsaseq
 import sys
+import os
 import string
 from midiinstruments import *
 
@@ -259,11 +260,10 @@ class Seq:
         tracks = []
         tags = {}
         orderedtags = []
-        try:
+        if os.path.exists(path):
             f = open(path)
-        except:
-            print('Error opening file', path)
-            print(sys.exc_info()[1])
+        else:
+            print('Not found:', path)
             return
 
         for line in f.readlines():
