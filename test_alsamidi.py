@@ -195,6 +195,7 @@ class TestSeq(TestCase):
 class SeqRead(TestCase):
 
     def setUp(self):
+        import os
         try:
             from mock import Mock
         except:
@@ -212,11 +213,24 @@ class SeqRead(TestCase):
 
         alsamidi.print = Mock()
 
+        self.exits = os.path.exists
+        os.path.exists = Mock(return_value=True)
+
     def  tearDown(self):
+        import os
         import alsamidi
 
         del alsamidi.open
         del alsamidi.print
+
+    def test_read_not_found(self):
+        import os
+        from alsamidi import Seq
+
+        os.path.exists.return_value = False
+        seq = Seq()
+        seq.read('path')
+        self.assertEqual([], seq.tracks)
 
     def test_read(self):
         from alsamidi import Seq
@@ -234,14 +248,6 @@ class SeqRead(TestCase):
         seq = Seq()
         seq.read('path')
         self.assertEqual(['Default'], seq.names)
-
-    def test_error(self):
-        from alsamidi import Seq
-        import alsamidi
-
-        alsamidi.open.side_effect = IOError
-        seq = Seq()
-        seq.read('path')
 
 
 class SeqWrite(TestCase):
