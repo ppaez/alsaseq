@@ -232,7 +232,7 @@ class SeqRead(TestCase):
         seq.read('path')
         self.assertEqual([], seq.tracks)
 
-    def test_read(self):
+    def test_read_named_track(self):
         from alsamidi import Seq
 
         seq = Seq()
@@ -248,6 +248,17 @@ class SeqRead(TestCase):
         seq = Seq()
         seq.read('path')
         self.assertEqual(['Default'], seq.names)
+
+    def test_read_track(self):
+        from alsamidi import Seq
+
+        seq = Seq()
+        seq.read('path')
+        self.assertEqual([[
+                (6, 1, 0, 1,
+                (2, 5430786),
+                (20, 0),
+                (130, 0), (1, 108, 82, 0, 0))]], seq.tracks)
 
 
 class SeqWrite(TestCase):
