@@ -313,7 +313,10 @@ alsaseq_input(PyObject *self, PyObject *args)
         
 	if (!PyArg_ParseTuple(args, "" ))
 		return NULL;
+
+        Py_BEGIN_ALLOW_THREADS
         snd_seq_event_input( seq_handle, &ev );
+        Py_END_ALLOW_THREADS
 
         switch( ev->type ) {
         case SND_SEQ_EVENT_NOTE:
