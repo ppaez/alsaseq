@@ -472,6 +472,66 @@ alsaseq_connect(PyObject *self, PyObject *args)
         return PyInt_FromLong(res);
 }
 
+
+static char alsaseq_listconnections__doc__[] =
+"listconnections() --> list of connections.\n\nList alsa midi connections."
+;
+
+static PyObject *
+alsaseq_listconnections(PyObject *self, PyObject *args)
+{
+        PyObject* list = PyList_New(0);
+
+	if (!PyArg_ParseTuple(args, ""))
+		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
+        snd_seq_client_info_t *cinfo;
+        snd_seq_port_info_t *pinfo;
+
+        snd_seq_client_info_alloca(&cinfo);
+        snd_seq_port_info_alloca(&pinfo);
+        snd_seq_client_info_set_client(cinfo, -1);
+        while (snd_seq_query_next_client(seq_handle, cinfo) >= 0) {
+            snd_seq_port_info_set_client(pinfo, snd_seq_client_info_get_client(cinfo));
+            snd_seq_port_info_set_port(pinfo, -1);
+            while (snd_seq_query_next_port(seq_handle, pinfo) >= 0) {
+                const snd_seq_addr_t* addr = snd_seq_port_info_get_addr(pinfo);
+
+                snd_seq_query_subscribe_t *subs;
+                snd_seq_query_subscribe_alloca(&subs);
+                snd_seq_query_subscribe_set_root(subs, addr);
+
+                snd_seq_query_subscribe_set_type(subs, SND_SEQ_QUERY_SUBS_READ); // connecting to
+                snd_seq_query_subscribe_set_index(subs, 0);
+                while (snd_seq_query_port_subscribers(seq_handle, subs) >= 0) {
+                    const snd_seq_addr_t *conn_addr = snd_seq_query_subscribe_get_addr(subs);
+                    PyObject* root_tuple = PyTuple_New(2);
+                    PyObject* from_tuple = PyTuple_New(2);
+                    PyObject* to_tuple   = PyTuple_New(2);
+
+                    PyTuple_SetItem(from_tuple, 0, PyInt_FromLong(addr->client));
+                    PyTuple_SetItem(from_tuple, 1, PyInt_FromLong(addr->port));
+
+                    PyTuple_SetItem(to_tuple, 0, PyInt_FromLong(conn_addr->client));
+                    PyTuple_SetItem(to_tuple, 1, PyInt_FromLong(conn_addr->port));
+
+                    PyTuple_SetItem(root_tuple, 0, from_tuple);
+                    PyTuple_SetItem(root_tuple, 1, to_tuple);
+
+                    PyList_Append(list, root_tuple);
+                    snd_seq_query_subscribe_set_index(subs, snd_seq_query_subscribe_get_index(subs) + 1);
+                }
+            }
+        }
+
+        return list;
+}
+
 /* start python 2 & python 3 dual support for initialization */
 
 struct module_state {
@@ -501,6 +561,7 @@ static struct PyMethodDef alsaseq_methods[] = {
  {"input",	(PyCFunction)alsaseq_input,	METH_VARARGS,	alsaseq_input__doc__},
  {"fd",	(PyCFunction)alsaseq_fd,	METH_VARARGS,	alsaseq_fd__doc__},
  {"connect", (PyCFunction)alsaseq_connect, METH_VARARGS, alsaseq_connect__doc__},
+ {"listconnections", (PyCFunction)alsaseq_listconnections, METH_VARARGS, alsaseq_listconnections__doc__},
  
 	{NULL,	 (PyCFunction)NULL, 0, NULL}		/* sentinel */
 };
