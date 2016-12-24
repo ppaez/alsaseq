@@ -438,6 +438,40 @@ alsaseq_fd(PyObject *self, PyObject *args)
 }
 
 
+static char alsaseq_connect__doc__[] =
+"connect(in_client, in_port, out_client, out_port) --> alsa error code.\n\nConnect two client:ports."
+;
+
+static PyObject *
+alsaseq_connect(PyObject *self, PyObject *args)
+{
+        int in_client, in_port, out_client, out_port;
+        snd_seq_port_subscribe_t* subs;
+        snd_seq_addr_t sender, dest;
+
+	if (!PyArg_ParseTuple(args, "iiii", &in_client, &in_port, &out_client, &out_port ))
+		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
+        snd_seq_port_subscribe_malloc(&subs);
+        memset(subs, 0, snd_seq_port_subscribe_sizeof());
+        sender.client = in_client;
+        sender.port = in_port;
+        dest.client = out_client;
+        dest.port = out_port;
+        snd_seq_port_subscribe_set_sender(subs, &sender);
+        snd_seq_port_subscribe_set_dest(subs, &dest);
+
+        int res = snd_seq_subscribe_port(seq_handle, subs);
+
+        snd_seq_port_subscribe_free(subs);
+        return PyInt_FromLong(res);
+}
+
 /* start python 2 & python 3 dual support for initialization */
 
 struct module_state {
@@ -466,6 +500,7 @@ static struct PyMethodDef alsaseq_methods[] = {
  {"id",	(PyCFunction)alsaseq_id,	METH_VARARGS,	alsaseq_id__doc__},
  {"input",	(PyCFunction)alsaseq_input,	METH_VARARGS,	alsaseq_input__doc__},
  {"fd",	(PyCFunction)alsaseq_fd,	METH_VARARGS,	alsaseq_fd__doc__},
+ {"connect", (PyCFunction)alsaseq_connect, METH_VARARGS, alsaseq_connect__doc__},
  
 	{NULL,	 (PyCFunction)NULL, 0, NULL}		/* sentinel */
 };
