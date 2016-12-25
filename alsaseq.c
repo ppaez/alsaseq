@@ -438,6 +438,38 @@ alsaseq_fd(PyObject *self, PyObject *args)
 }
 
 
+static void loop_over_all_ports(void (*func)(snd_seq_client_info_t*, snd_seq_port_info_t*, void*), void* data){
+        snd_seq_client_info_t *cinfo;
+        snd_seq_port_info_t *pinfo;
+
+        snd_seq_client_info_alloca(&cinfo);
+        snd_seq_port_info_alloca(&pinfo);
+        snd_seq_client_info_set_client(cinfo, -1);
+        while (snd_seq_query_next_client(seq_handle, cinfo) >= 0) {
+                snd_seq_port_info_set_client(pinfo, snd_seq_client_info_get_client(cinfo));
+                snd_seq_port_info_set_port(pinfo, -1);
+                while (snd_seq_query_next_port(seq_handle, pinfo) >= 0) {
+                        func(cinfo, pinfo, data);
+                }
+        }
+}
+
+static void loop_over_subs(void (*func)(snd_seq_query_subscribe_t*, void*), snd_seq_port_info_t* pinfo, void* data){
+
+        const snd_seq_addr_t* addr = snd_seq_port_info_get_addr(pinfo);
+
+        snd_seq_query_subscribe_t *subs;
+        snd_seq_query_subscribe_alloca(&subs);
+        snd_seq_query_subscribe_set_root(subs, addr);
+
+        snd_seq_query_subscribe_set_type(subs, SND_SEQ_QUERY_SUBS_READ); // connecting to
+        snd_seq_query_subscribe_set_index(subs, 0);
+        while (snd_seq_query_port_subscribers(seq_handle, subs) >= 0) {
+                func(subs, data);
+        }
+}
+
+
 static char alsaseq_connect__doc__[] =
 "connect(in_client, in_port, out_client, out_port) --> alsa error code.\n\nConnect two client:ports."
 ;
@@ -472,22 +504,6 @@ alsaseq_connect(PyObject *self, PyObject *args)
         return PyInt_FromLong(res);
 }
 
-static void loop_over_all_ports(void (*func)(snd_seq_client_info_t*, snd_seq_port_info_t*, void*), void* data){
-        snd_seq_client_info_t *cinfo;
-        snd_seq_port_info_t *pinfo;
-
-        snd_seq_client_info_alloca(&cinfo);
-        snd_seq_port_info_alloca(&pinfo);
-        snd_seq_client_info_set_client(cinfo, -1);
-        while (snd_seq_query_next_client(seq_handle, cinfo) >= 0) {
-                snd_seq_port_info_set_client(pinfo, snd_seq_client_info_get_client(cinfo));
-                snd_seq_port_info_set_port(pinfo, -1);
-                while (snd_seq_query_next_port(seq_handle, pinfo) >= 0) {
-                        func(cinfo, pinfo, data);
-                }
-        }
-}
-
 static char alsaseq_listconnections__doc__[] =
 "listconnections() --> list of connections.\n\nList alsa midi connections."
 ;
@@ -505,34 +521,30 @@ alsaseq_listconnections(PyObject *self, PyObject *args)
 
         PyObject* list = PyList_New(0);
 
+        void fill_subs(snd_seq_query_subscribe_t* subs, void* data){
+                const snd_seq_addr_t *conn_addr = snd_seq_query_subscribe_get_addr(subs);
+                const snd_seq_addr_t *addr = snd_seq_query_subscribe_get_root(subs);
+                PyObject* l_list = (PyObject*)data;
+
+                PyObject* root_tuple = PyTuple_New(2);
+                PyObject* from_tuple = PyTuple_New(2);
+                PyObject* to_tuple   = PyTuple_New(2);
+
+                PyTuple_SetItem(from_tuple, 0, PyInt_FromLong(addr->client));
+                PyTuple_SetItem(from_tuple, 1, PyInt_FromLong(addr->port));
+
+                PyTuple_SetItem(to_tuple, 0, PyInt_FromLong(conn_addr->client));
+                PyTuple_SetItem(to_tuple, 1, PyInt_FromLong(conn_addr->port));
+
+                PyTuple_SetItem(root_tuple, 0, from_tuple);
+                PyTuple_SetItem(root_tuple, 1, to_tuple);
+
+                PyList_Append(l_list, root_tuple);
+                snd_seq_query_subscribe_set_index(subs, snd_seq_query_subscribe_get_index(subs) + 1);
+        }
+
         void port_connections_to(snd_seq_client_info_t* cinfo, snd_seq_port_info_t* pinfo, void* data){
-                PyObject* list = (PyObject*)data;
-                const snd_seq_addr_t* addr = snd_seq_port_info_get_addr(pinfo);
-
-                snd_seq_query_subscribe_t *subs;
-                snd_seq_query_subscribe_alloca(&subs);
-                snd_seq_query_subscribe_set_root(subs, addr);
-
-                snd_seq_query_subscribe_set_type(subs, SND_SEQ_QUERY_SUBS_READ); // connecting to
-                snd_seq_query_subscribe_set_index(subs, 0);
-                while (snd_seq_query_port_subscribers(seq_handle, subs) >= 0) {
-                        const snd_seq_addr_t *conn_addr = snd_seq_query_subscribe_get_addr(subs);
-                        PyObject* root_tuple = PyTuple_New(2);
-                        PyObject* from_tuple = PyTuple_New(2);
-                        PyObject* to_tuple   = PyTuple_New(2);
-
-                        PyTuple_SetItem(from_tuple, 0, PyInt_FromLong(addr->client));
-                        PyTuple_SetItem(from_tuple, 1, PyInt_FromLong(addr->port));
-
-                        PyTuple_SetItem(to_tuple, 0, PyInt_FromLong(conn_addr->client));
-                        PyTuple_SetItem(to_tuple, 1, PyInt_FromLong(conn_addr->port));
-
-                        PyTuple_SetItem(root_tuple, 0, from_tuple);
-                        PyTuple_SetItem(root_tuple, 1, to_tuple);
-
-                        PyList_Append(list, root_tuple);
-                        snd_seq_query_subscribe_set_index(subs, snd_seq_query_subscribe_get_index(subs) + 1);
-                }
+                loop_over_subs(fill_subs, pinfo, data);
         }
 
         loop_over_all_ports(port_connections_to, (void*)list);
