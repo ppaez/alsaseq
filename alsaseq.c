@@ -540,6 +540,53 @@ alsaseq_listconnections(PyObject *self, PyObject *args)
         return list;
 }
 
+static char alsaseq_listdevices__doc__[] =
+"listdevices() --> return listing of all devices and their ports.\n\nList alsa midi devices and all their ports and info and stuff."
+;
+
+static PyObject *
+alsaseq_listdevices(PyObject *self, PyObject *args)
+{
+        if (!PyArg_ParseTuple(args, ""))
+		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
+        void clients_ports_info(snd_seq_client_info_t* cinfo, snd_seq_port_info_t* pinfo, void* data){
+                PyObject* out_dict = (PyObject*)data;
+                const char* client_name = snd_seq_client_info_get_name(cinfo);
+                const char* port_name = snd_seq_port_info_get_name(pinfo);
+                int port_num = snd_seq_port_info_get_port(pinfo);
+                PyObject* port_capabilities = PyInt_FromLong(snd_seq_port_info_get_capability(pinfo));
+                PyObject* this_client;
+                if (!PyDict_Contains(out_dict, PyUnicode_FromString(client_name))){
+                        this_client = PyDict_New();
+                        PyDict_SetItemString(this_client, "name", PyUnicode_FromString(client_name));
+                        PyDict_SetItemString(this_client, "num", PyInt_FromLong(snd_seq_client_info_get_client(cinfo)));
+                        PyDict_SetItemString(this_client, "ports", PyList_New(0));
+                        PyDict_SetItemString(out_dict, client_name, this_client);
+                }
+                this_client = PyDict_GetItemString(out_dict, client_name);
+                this_client = PyDict_GetItemString(this_client, "ports");
+
+                // add port
+                PyObject* this_port = PyDict_New();
+                PyDict_SetItemString(this_port, "name", PyUnicode_FromString(port_name));
+                PyDict_SetItemString(this_port, "num", PyInt_FromLong(port_num));
+                PyDict_SetItemString(this_port, "caps", port_capabilities);
+                PyList_Append(this_client, this_port);
+
+        }
+
+        PyObject* out_dict = PyDict_New();
+        loop_over_all_ports(clients_ports_info, (void*)out_dict);
+
+        return out_dict;
+}
+
 /* start python 2 & python 3 dual support for initialization */
 
 struct module_state {
@@ -570,6 +617,7 @@ static struct PyMethodDef alsaseq_methods[] = {
  {"fd",	(PyCFunction)alsaseq_fd,	METH_VARARGS,	alsaseq_fd__doc__},
  {"connect", (PyCFunction)alsaseq_connect, METH_VARARGS, alsaseq_connect__doc__},
  {"listconnections", (PyCFunction)alsaseq_listconnections, METH_VARARGS, alsaseq_listconnections__doc__},
+ {"listdevices", (PyCFunction)alsaseq_listdevices, METH_VARARGS, alsaseq_listdevices__doc__},
  
 	{NULL,	 (PyCFunction)NULL, 0, NULL}		/* sentinel */
 };
