@@ -504,6 +504,41 @@ alsaseq_connect(PyObject *self, PyObject *args)
         return PyInt_FromLong(res);
 }
 
+static char alsaseq_disconnect__doc__[] =
+"disconnect(in_client, in_port, out_client, out_port) --> alsa error code.\n\nDisconnect two client:ports if they are already connected."
+;
+
+static PyObject *
+alsaseq_disconnect(PyObject *self, PyObject *args)
+{
+        int in_client, in_port, out_client, out_port;
+        snd_seq_port_subscribe_t* subs;
+        snd_seq_addr_t sender, dest;
+
+	if (!PyArg_ParseTuple(args, "iiii", &in_client, &in_port, &out_client, &out_port ))
+		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
+        snd_seq_port_subscribe_malloc(&subs);
+        memset(subs, 0, snd_seq_port_subscribe_sizeof());
+        sender.client = in_client;
+        sender.port = in_port;
+        dest.client = out_client;
+        dest.port = out_port;
+        snd_seq_port_subscribe_set_sender(subs, &sender);
+        snd_seq_port_subscribe_set_dest(subs, &dest);
+
+        int res = snd_seq_unsubscribe_port(seq_handle, subs);
+
+        snd_seq_port_subscribe_free(subs);
+        return PyInt_FromLong(res);
+}
+
+
 static char alsaseq_listconnections__doc__[] =
 "listconnections() --> list of connections.\n\nList alsa midi connections."
 ;
@@ -628,6 +663,7 @@ static struct PyMethodDef alsaseq_methods[] = {
  {"input",	(PyCFunction)alsaseq_input,	METH_VARARGS,	alsaseq_input__doc__},
  {"fd",	(PyCFunction)alsaseq_fd,	METH_VARARGS,	alsaseq_fd__doc__},
  {"connect", (PyCFunction)alsaseq_connect, METH_VARARGS, alsaseq_connect__doc__},
+ {"disconnect", (PyCFunction)alsaseq_disconnect, METH_VARARGS, alsaseq_disconnect__doc__},
  {"listconnections", (PyCFunction)alsaseq_listconnections, METH_VARARGS, alsaseq_listconnections__doc__},
  {"listdevices", (PyCFunction)alsaseq_listdevices, METH_VARARGS, alsaseq_listdevices__doc__},
  
