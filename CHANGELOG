@@ -1,3 +1,11 @@
+0.4.2 28 December 2016
+      Fix build error due to misssing constants.c
+      Handle unitialized module
+      Release the PIL in blocking IO
+      Add unit tests for alsamidi.py
+      Use tox and coverage
+      Add a tracker application
+
 0.4.1 26 January 2011
       setup.py: Added missing comma
 
