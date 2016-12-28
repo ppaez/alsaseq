@@ -232,6 +232,27 @@ Player
       alsaseq.output( event )
 
 
+Troubleshooting
+~~~~~~~~~~~~~~~
+
+Module not initialized
+^^^^^^^^^^^^^^^^^^^^^^
+
+Many of the functions will fail if the module is not initialized::
+
+  >>> import alsaseq
+  >>> alsaseq.fd()
+  Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+  RuntimeError: Must initialize module with alsaseq.client() before using it
+  >>>
+
+Call `alsaseq.client()` to solve this::
+
+  >>> alsaseq.client('Simple', 1, 1, True)
+  >>> alsaseq.fd()
+  3
+
 Appendix
 ~~~~~~~~
 

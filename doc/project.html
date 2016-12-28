@@ -3,13 +3,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.6: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.13.1: http://docutils.sourceforge.net/" />
 <title>alsaseq – ALSA sequencer bindings for Python</title>
 <style type="text/css">
 
 /*
 :Author: David Goodger (goodger@python.org)
-:Id: $Id: html4css1.css 5951 2009-05-18 18:03:10Z milde $
+:Id: $Id: html4css1.css 7952 2016-07-26 18:15:59Z milde $
 :Copyright: This stylesheet has been placed in the public domain.
 
 Default cascading style sheet for the HTML output of Docutils.
@@ -37,6 +37,14 @@ table.borderless td, table.borderless th {
 .hidden {
   display: none }
 
+.subscript {
+  vertical-align: sub;
+  font-size: smaller }
+
+.superscript {
+  vertical-align: super;
+  font-size: smaller }
+
 a.toc-backref {
   text-decoration: none ;
   color: black }
@@ -46,6 +54,10 @@ blockquote.epigraph {
 
 dl.docutils dd {
   margin-bottom: 0.5em }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden;
+}
 
 /* Uncomment (and remove this text!) to get bold-faced definition list terms
 dl.docutils dt {
@@ -73,7 +85,7 @@ div.tip p.admonition-title {
 
 div.attention p.admonition-title, div.caution p.admonition-title,
 div.danger p.admonition-title, div.error p.admonition-title,
-div.warning p.admonition-title {
+div.warning p.admonition-title, .code .error {
   color: red ;
   font-weight: bold ;
   font-family: sans-serif }
@@ -157,15 +169,26 @@ h2.subtitle {
 hr.docutils {
   width: 75% }
 
-img.align-left, .figure.align-left{
+img.align-left, .figure.align-left, object.align-left, table.align-left {
   clear: left ;
   float: left ;
   margin-right: 1em }
 
-img.align-right, .figure.align-right {
+img.align-right, .figure.align-right, object.align-right, table.align-right {
   clear: right ;
   float: right ;
   margin-left: 1em }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table.align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
 
 .align-left {
   text-align: left }
@@ -179,10 +202,19 @@ img.align-right, .figure.align-right {
 
 /* reset inner alignment in figures */
 div.align-right {
-  text-align: left }
+  text-align: inherit }
 
 /* div.align-center * { */
 /*   text-align: left } */
+
+.align-top    {
+  vertical-align: top }
+
+.align-middle {
+  vertical-align: middle }
+
+.align-bottom {
+  vertical-align: bottom }
 
 ol.simple, ul.simple {
   margin-bottom: 1em }
@@ -239,10 +271,18 @@ pre.address {
   margin-top: 0 ;
   font: inherit }
 
-pre.literal-block, pre.doctest-block {
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
   margin-left: 2em ;
-  margin-right: 2em ;
-  background-color: #eeeeee }
+  margin-right: 2em }
+
+pre.code .ln { color: grey; } /* line numbers */
+pre.code, code { background-color: #eeeeee }
+pre.code .comment, code .comment { color: #5C6576 }
+pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
+pre.code .literal.string, code .literal.string { color: #0C5404 }
+pre.code .name.builtin, code .name.builtin { color: #352B84 }
+pre.code .deleted, code .deleted { background-color: #DEB0A1}
+pre.code .inserted, code .inserted { background-color: #A3D289}
 
 span.classifier {
   font-family: sans-serif ;
@@ -295,6 +335,21 @@ table.docutils th.field-name, table.docinfo th.docinfo-name {
   white-space: nowrap ;
   padding-left: 0 }
 
+/* "booktabs" style (no vertical lines) */
+table.docutils.booktabs {
+  border: 0px;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  border-collapse: collapse;
+}
+table.docutils.booktabs * {
+  border: 0px;
+}
+table.docutils.booktabs th {
+  border-bottom: thin solid;
+  text-align: left;
+}
+
 h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
 h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
   font-size: 100% }
@@ -339,7 +394,8 @@ later.</p>
 <li><a class="reference internal" href="#installation" id="id2">Installation</a></li>
 <li><a class="reference internal" href="#interactive-use" id="id3">Interactive use</a></li>
 <li><a class="reference internal" href="#examples" id="id4">Examples</a></li>
-<li><a class="reference internal" href="#appendix" id="id5">Appendix</a></li>
+<li><a class="reference internal" href="#troubleshooting" id="id5">Troubleshooting</a></li>
+<li><a class="reference internal" href="#appendix" id="id6">Appendix</a></li>
 </ul>
 </div>
 <div class="section" id="requirements">
@@ -530,8 +586,29 @@ for event in events:
 </pre>
 </div>
 </div>
+<div class="section" id="troubleshooting">
+<h1><a class="toc-backref" href="#id5">Troubleshooting</a></h1>
+<div class="section" id="module-not-initialized">
+<h2>Module not initialized</h2>
+<p>Many of the functions will fail if the module is not initialized:</p>
+<pre class="literal-block">
+&gt;&gt;&gt; import alsaseq
+&gt;&gt;&gt; alsaseq.fd()
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+RuntimeError: Must initialize module with alsaseq.client() before using it
+&gt;&gt;&gt;
+</pre>
+<p>Call <cite>alsaseq.client()</cite> to solve this:</p>
+<pre class="literal-block">
+&gt;&gt;&gt; alsaseq.client('Simple', 1, 1, True)
+&gt;&gt;&gt; alsaseq.fd()
+3
+</pre>
+</div>
+</div>
 <div class="section" id="appendix">
-<h1><a class="toc-backref" href="#id5">Appendix</a></h1>
+<h1><a class="toc-backref" href="#id6">Appendix</a></h1>
 <div class="section" id="manually-build-and-install">
 <h2>Manually build and install</h2>
 <p>This is just provided for informational purposes, in case the setup.py
@@ -567,7 +644,7 @@ a package with the same name.</p>
 module, you may connect them to your PC using a <em>USB-to-MIDI interface</em>.
 I use the <strong>MIDI 1x1</strong>  from <em>E-EMU</em> and the <strong>MIDIsport UNO</strong>
 from <em>M-AUDIO</em> which work fine.</p>
-<p>Document generated on 2011-01-13 at 22:42 CST.</p>
+<p>Document generated on 2016-12-27 at 21:40 CST.</p>
 </div>
 </div>
 </div>
