@@ -46,11 +46,22 @@ are installed.
 Installation
 ~~~~~~~~~~~~
 
-Download the latest alsaseq.tar.gz file into a directory::
+Install the current version from the Python Package Index using pip::
 
- $ wget http://pp.com.mx/python/alsaseq/alsaseq-<version>.tar.gz
+  pip install alsaseq
 
-Extract the contents::
+Or install the development version from the `alsaseq repository`__
+in GitHub::
+
+  git clone https://github.com/ppaez/alsaseq.git
+  cd alsaseq
+  python setup.py install
+
+.. __: https://github.com/ppaez/alsaseq
+
+Or download the current tarball from the `alsaseq page`__ in the
+Python Package Index:  Click on the green *Download
+alsaseq.-x.y.tar.gz* button, then extract the contents::
 
  $ tar xf alsaseq-<version>.tar.gz 
 
@@ -80,6 +91,12 @@ For python 3, the last three commands should be::
 
 It is possible to build and install the module for both Python 2 and 3, both
 versions can coexist in the same system.
+
+.. __: https://pypi.python.org/pypi/alsaseq
+
+Old versions of alsaseq are kept for reference in the home page at
+http://pp.com.mx/python/alsaseq
+
 
 Interactive use
 ~~~~~~~~~~~~~~~
