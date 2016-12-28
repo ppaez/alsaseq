@@ -113,6 +113,11 @@ alsaseq_start(PyObject *self /* Not used */, PyObject *args)
 	if (!PyArg_ParseTuple(args, "" ))
 		return NULL;
 
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
         snd_seq_start_queue(seq_handle, queue_id, NULL);
         snd_seq_drain_output(seq_handle);
 
@@ -129,6 +134,11 @@ alsaseq_stop(PyObject *self /* Not used */, PyObject *args)
 {
 	if (!PyArg_ParseTuple(args, "" ))
 		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
 
         snd_seq_stop_queue(seq_handle, queue_id, NULL);
         snd_seq_drain_output(seq_handle);
@@ -152,6 +162,11 @@ alsaseq_status(PyObject *self /* Not used */, PyObject *args)
         const snd_seq_real_time_t *current_time;
 	if (!PyArg_ParseTuple(args, "" ))
 		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
 
         snd_seq_queue_status_malloc( &queue_status );
         snd_seq_get_queue_status( seq_handle, queue_id, queue_status );
@@ -186,6 +201,12 @@ alsaseq_output(PyObject *self, PyObject *args)
         
 	if (!PyArg_ParseTuple(args, "(bbbb(ii)(bb)(bb)O)", &ev.type, &ev.flags, &ev.tag, &ev.queue, &ev.time.time.tv_sec, &ev.time.time.tv_nsec, &ev.source.client, &ev.source.port, &ev.dest.client, &ev.dest.port, &data ))
 		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
         /* printf ( "event.type: %d\n", ev.type ); */
         switch( ev.type ) {
         case SND_SEQ_EVENT_NOTE:
@@ -232,6 +253,12 @@ alsaseq_id(PyObject *self, PyObject *args)
         
 	if (!PyArg_ParseTuple(args, "" ))
 		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
         res = snd_seq_client_id( seq_handle );
 
         return PyInt_FromLong( res );
@@ -245,6 +272,11 @@ static char alsaseq_syncoutput__doc__[] =
 static PyObject *
 alsaseq_syncoutput(PyObject *self, PyObject *args)
 {
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
         snd_seq_sync_output_queue( seq_handle );
 
 	Py_INCREF(Py_None);
@@ -267,6 +299,12 @@ alsaseq_connectto(PyObject *self, PyObject *args)
         
 	if (!PyArg_ParseTuple(args, "iii", &myport, &dest_client, &dest_port ))
 		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
         snd_seq_connect_to( seq_handle, myport, dest_client, dest_port);
 
 	Py_INCREF(Py_None);
@@ -289,6 +327,12 @@ alsaseq_connectfrom(PyObject *self, PyObject *args)
         
 	if (!PyArg_ParseTuple(args, "iii", &myport, &dest_client, &dest_port ))
 		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
         snd_seq_connect_from( seq_handle, myport, dest_client, dest_port);
 
 	Py_INCREF(Py_None);
@@ -313,6 +357,11 @@ alsaseq_input(PyObject *self, PyObject *args)
         
 	if (!PyArg_ParseTuple(args, "" ))
 		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
 
         Py_BEGIN_ALLOW_THREADS
         snd_seq_event_input( seq_handle, &ev );
@@ -352,6 +401,12 @@ alsaseq_inputpending(PyObject *self, PyObject *args)
         
 	if (!PyArg_ParseTuple(args, "" ))
 		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
         res = snd_seq_event_input_pending( seq_handle, 1 ); /* fetch_sequencer */
 
         return PyInt_FromLong( res );
@@ -369,6 +424,12 @@ alsaseq_fd(PyObject *self, PyObject *args)
         
 	if (!PyArg_ParseTuple(args, "" ))
 		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
   npfd = snd_seq_poll_descriptors_count(seq_handle, POLLIN);
   pfd = (struct pollfd *)alloca(npfd * sizeof(struct pollfd));
   snd_seq_poll_descriptors(seq_handle, pfd, npfd, POLLIN);
