@@ -68,9 +68,10 @@ alsaseq_client(PyObject *self /* Not used */, PyObject *args)
       queue_id = snd_seq_alloc_queue(seq_handle);
   else
       queue_id = SND_SEQ_QUEUE_DIRECT;
-
+  char buf[20];
   for ( n=0; n < ninputports; n++ ) {
-    if (( portid = snd_seq_create_simple_port(seq_handle, "Input port",
+    sprintf(buf, "Input port %d", n);
+    if (( portid = snd_seq_create_simple_port(seq_handle, buf,
             SND_SEQ_PORT_CAP_WRITE|SND_SEQ_PORT_CAP_SUBS_WRITE,
             SND_SEQ_PORT_TYPE_APPLICATION)) < 0) {
     fprintf(stderr, "Error creating input port %d.\n", n );
@@ -89,7 +90,8 @@ alsaseq_client(PyObject *self /* Not used */, PyObject *args)
   }
 
   for ( n=0; n < noutputports; n++ ) {
-    if (( portid = snd_seq_create_simple_port(seq_handle, "Output port",
+    sprintf(buf, "Output port %d", n);
+    if (( portid = snd_seq_create_simple_port(seq_handle, buf,
             SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ,
             SND_SEQ_PORT_TYPE_APPLICATION)) < 0) {
       fprintf(stderr, "Error creating output port %d.\n", n );
