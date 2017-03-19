@@ -180,6 +180,42 @@ alsaseq_status(PyObject *self /* Not used */, PyObject *args)
 	return Py_BuildValue( "(i(ii),i)", running, current_time->tv_sec, current_time->tv_nsec, events );
 }
 
+static char alsaseq_sysex__doc__[] = 
+"sysex( event ) --> None.\n\n"
+"Send SYSEX event, e.g:\n"
+"           b = bytearray()\n"
+"           b.append('\xF0') # SYSEX start\n"
+"           for c in arr:     # create sysex from byte array example\n"
+"               b.append(c+1) # if array elements can be zero, shift up: sysex may not contain zero chars\n"
+"           for c in strng:   # create sysex from a string\n"
+"               b.append(ord(c))\n"
+"           b.append('\xF7')  # SYSEX finish\n"
+"           alsaseq.sysex((130, 0, 0, 253, (0, 0), (0, 5), (0, 0), str(b)))\n";
+
+static PyObject * alsaseq_sysex(PyObject *self, PyObject *args) {
+  snd_seq_event_t ev;
+  const char * data;
+        
+	if (!PyArg_ParseTuple(args, "(bbbb(ii)(bb)(bb)s)", &ev.type, &ev.flags, &ev.tag, &ev.queue, &ev.time.time.tv_sec, &ev.time.time.tv_nsec, &ev.source.client, &ev.source.port, &ev.dest.client, &ev.dest.port, &data ))
+		return NULL;
+
+	snd_seq_ev_set_sysex(&ev, strlen(data), data);
+
+        /* If not a direct event, use the queue */
+        if ( ev.queue != SND_SEQ_QUEUE_DIRECT )
+            ev.queue = queue_id;
+        /* Modify source port if out of bounds */
+        if ( ev.source.port < firstoutputport ) 
+           snd_seq_ev_set_source(&ev, firstoutputport );
+        else if ( ev.source.port > lastoutputport )
+           snd_seq_ev_set_source(&ev, lastoutputport );
+        /* Use subscribed ports, except if ECHO event */
+        if ( ev.type != SND_SEQ_EVENT_ECHO ) snd_seq_ev_set_subs(&ev);
+        snd_seq_event_output_direct( seq_handle, &ev );
+        
+	Py_INCREF(Py_None);
+	return Py_None;
+}
 
 static char alsaseq_output__doc__[] =
 "output( event ) --> None.\n\n"
@@ -704,6 +740,7 @@ static struct PyMethodDef alsaseq_methods[] = {
  {"start",	(PyCFunction)alsaseq_start,	METH_VARARGS,	alsaseq_start__doc__},
  {"stop",	(PyCFunction)alsaseq_stop,	METH_VARARGS,	alsaseq_stop__doc__},
  {"status",	(PyCFunction)alsaseq_status,	METH_VARARGS,	alsaseq_status__doc__},
+ {"sysex",	(PyCFunction)alsaseq_sysex,	METH_VARARGS,	alsaseq_sysex__doc__},
  {"output",	(PyCFunction)alsaseq_output,	METH_VARARGS,	alsaseq_output__doc__},
  {"syncoutput",	(PyCFunction)alsaseq_syncoutput,	METH_VARARGS,	alsaseq_syncoutput__doc__},
  {"connectto",	(PyCFunction)alsaseq_connectto,	METH_VARARGS,	alsaseq_connectto__doc__},
