@@ -342,6 +342,54 @@ alsaseq_connectfrom(PyObject *self, PyObject *args)
 }
 
 
+static char alsaseq_disconnectto__doc__[] =
+"Disconnectto( outputport, dest_client, dest_port ) --> None.\n\n"
+"Disconnect outputport to dest_client:dest_port.";;
+
+static PyObject *
+alsaseq_disconnectto(PyObject *self, PyObject *args)
+{
+  int myport, dest_client, dest_port;
+
+	if (!PyArg_ParseTuple(args, "iii", &myport, &dest_client, &dest_port ))
+		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
+        snd_seq_disconnect_to( seq_handle, myport, dest_client, dest_port);
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
+
+static char alsaseq_disconnectfrom__doc__[] =
+"disconnectfrom( inputport, src_client, src_port ) --> None.\n\n"
+"Disconnect inputport from src_client:src_port.";
+
+static PyObject *
+alsaseq_disconnectfrom(PyObject *self, PyObject *args)
+{
+  int myport, dest_client, dest_port;
+
+	if (!PyArg_ParseTuple(args, "iii", &myport, &dest_client, &dest_port ))
+		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
+        snd_seq_disconnect_from( seq_handle, myport, dest_client, dest_port);
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
+
 static char alsaseq_input__doc__[] =
 "input() --> event.\n\nWait for an ALSA event in any of the input ports and return it.\n\n"
 "ALSA events are returned as a tuple with 8 elements:\n"
@@ -464,6 +512,8 @@ static struct PyMethodDef alsaseq_methods[] = {
  {"syncoutput",	(PyCFunction)alsaseq_syncoutput,	METH_VARARGS,	alsaseq_syncoutput__doc__},
  {"connectto",	(PyCFunction)alsaseq_connectto,	METH_VARARGS,	alsaseq_connectto__doc__},
  {"connectfrom",	(PyCFunction)alsaseq_connectfrom,	METH_VARARGS,	alsaseq_connectfrom__doc__},
+ {"disconnectto",	(PyCFunction)alsaseq_disconnectto,	METH_VARARGS,	alsaseq_disconnectto__doc__},
+ {"disconnectfrom",	(PyCFunction)alsaseq_disconnectfrom,	METH_VARARGS,	alsaseq_disconnectfrom__doc__},
  {"inputpending",	(PyCFunction)alsaseq_inputpending,	METH_VARARGS,	alsaseq_inputpending__doc__},
  {"id",	(PyCFunction)alsaseq_id,	METH_VARARGS,	alsaseq_id__doc__},
  {"input",	(PyCFunction)alsaseq_input,	METH_VARARGS,	alsaseq_input__doc__},
