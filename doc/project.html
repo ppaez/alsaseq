@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.13.1: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
 <title>alsaseq – ALSA sequencer bindings for Python</title>
 <style type="text/css">
 
@@ -390,16 +390,16 @@ later.</p>
 <div class="contents topic" id="contents">
 <p class="topic-title first">Contents</p>
 <ul class="simple">
-<li><a class="reference internal" href="#requirements" id="id1">Requirements</a></li>
-<li><a class="reference internal" href="#installation" id="id2">Installation</a></li>
-<li><a class="reference internal" href="#interactive-use" id="id3">Interactive use</a></li>
-<li><a class="reference internal" href="#examples" id="id4">Examples</a></li>
-<li><a class="reference internal" href="#troubleshooting" id="id5">Troubleshooting</a></li>
-<li><a class="reference internal" href="#appendix" id="id6">Appendix</a></li>
+<li><a class="reference internal" href="#requirements" id="id3">Requirements</a></li>
+<li><a class="reference internal" href="#installation" id="id4">Installation</a></li>
+<li><a class="reference internal" href="#interactive-use" id="id5">Interactive use</a></li>
+<li><a class="reference internal" href="#examples" id="id6">Examples</a></li>
+<li><a class="reference internal" href="#troubleshooting" id="id7">Troubleshooting</a></li>
+<li><a class="reference internal" href="#appendix" id="id8">Appendix</a></li>
 </ul>
 </div>
 <div class="section" id="requirements">
-<h1><a class="toc-backref" href="#id1">Requirements</a></h1>
+<h1><a class="toc-backref" href="#id3">Requirements</a></h1>
 <p>The Python and the ALSA development header files, as well as the GNU C compiler
 are needed to compile the module. If you use Debian or a distribution derived
 from Debian like Ubuntu, make sure that the <strong>python-dev</strong> (for Python 2),
@@ -409,12 +409,21 @@ installed. If you use Mandriva, check that the <strong>libpython2.6-devel</stron
 are installed.</p>
 </div>
 <div class="section" id="installation">
-<h1><a class="toc-backref" href="#id2">Installation</a></h1>
-<p>Download the latest alsaseq.tar.gz file into a directory:</p>
+<h1><a class="toc-backref" href="#id4">Installation</a></h1>
+<p>Install the current version from the Python Package Index using pip:</p>
 <pre class="literal-block">
-$ wget http://pp.com.mx/python/alsaseq/alsaseq-&lt;version&gt;.tar.gz
+pip install alsaseq
 </pre>
-<p>Extract the contents:</p>
+<p>Or install the development version from the <a class="reference external" href="https://github.com/ppaez/alsaseq">alsaseq repository</a>
+in GitHub:</p>
+<pre class="literal-block">
+git clone https://github.com/ppaez/alsaseq.git
+cd alsaseq
+python setup.py install
+</pre>
+<p>Or download the current tarball from the <a class="reference external" href="https://pypi.python.org/pypi/alsaseq">alsaseq page</a> in the
+Python Package Index:  Click on the green <em>Download
+alsaseq.-x.y.tar.gz</em> button, then extract the contents:</p>
 <pre class="literal-block">
 $ tar xf alsaseq-&lt;version&gt;.tar.gz
 </pre>
@@ -444,9 +453,11 @@ $ python3 -c 'import alsaseq, alsamidi'
 </pre>
 <p>It is possible to build and install the module for both Python 2 and 3, both
 versions can coexist in the same system.</p>
+<p>Old versions of alsaseq are kept for reference in the home page at
+<a class="reference external" href="http://pp.com.mx/python/alsaseq">http://pp.com.mx/python/alsaseq</a></p>
 </div>
 <div class="section" id="interactive-use">
-<h1><a class="toc-backref" href="#id3">Interactive use</a></h1>
+<h1><a class="toc-backref" href="#id5">Interactive use</a></h1>
 <p>Create an ALSA sequencer client with one input port and one output
 port, no queue:</p>
 <pre class="literal-block">
@@ -515,9 +526,14 @@ functions in alsamidi module:</p>
 (5, 1, 0, 0, (5, 0), (0, 0), (0, 0), (1, 60, 120, 0, 10))
 </pre>
 <p>&nbsp;See help( alsamidi ) or pydoc( alsamidi ) for more information.</p>
+<p>An input or output port can be disconnected and connected again:</p>
+<pre class="literal-block">
+&gt;&gt;&gt; alsaseq.disconnectto(1, 130, 0)
+&gt;&gt;&gt; alsaseq.connectto(1, 130, 1)
+</pre>
 </div>
 <div class="section" id="examples">
-<h1><a class="toc-backref" href="#id4">Examples</a></h1>
+<h1><a class="toc-backref" href="#id6">Examples</a></h1>
 <p>In these example scripts it is assumed that client 129 is a MIDI
 keyboard, clients 130 and 131 are MIDI sound generation modules.</p>
 <div class="section" id="midi-through">
@@ -587,7 +603,7 @@ for event in events:
 </div>
 </div>
 <div class="section" id="troubleshooting">
-<h1><a class="toc-backref" href="#id5">Troubleshooting</a></h1>
+<h1><a class="toc-backref" href="#id7">Troubleshooting</a></h1>
 <div class="section" id="module-not-initialized">
 <h2>Module not initialized</h2>
 <p>Many of the functions will fail if the module is not initialized:</p>
@@ -608,7 +624,7 @@ RuntimeError: Must initialize module with alsaseq.client() before using it
 </div>
 </div>
 <div class="section" id="appendix">
-<h1><a class="toc-backref" href="#id6">Appendix</a></h1>
+<h1><a class="toc-backref" href="#id8">Appendix</a></h1>
 <div class="section" id="manually-build-and-install">
 <h2>Manually build and install</h2>
 <p>This is just provided for informational purposes, in case the setup.py
@@ -644,7 +660,7 @@ a package with the same name.</p>
 module, you may connect them to your PC using a <em>USB-to-MIDI interface</em>.
 I use the <strong>MIDI 1x1</strong>  from <em>E-EMU</em> and the <strong>MIDIsport UNO</strong>
 from <em>M-AUDIO</em> which work fine.</p>
-<p>Document generated on 2016-12-27 at 21:40 CST.</p>
+<p>Document generated on 2017-11-15 at 18:18 CST.</p>
 </div>
 </div>
 </div>

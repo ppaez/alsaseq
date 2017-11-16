@@ -174,6 +174,10 @@ functions in alsamidi module::
 
  See help( alsamidi ) or pydoc( alsamidi ) for more information. 
 
+An input or output port can be disconnected and connected again::
+
+ >>> alsaseq.disconnectto(1, 130, 0)
+ >>> alsaseq.connectto(1, 130, 1)
 
 Examples
 ~~~~~~~~
