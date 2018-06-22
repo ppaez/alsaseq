@@ -488,6 +488,202 @@ alsaseq_fd(PyObject *self, PyObject *args)
 }
 
 
+static void loop_over_all_ports(void (*func)(snd_seq_client_info_t*, snd_seq_port_info_t*, void*), void* data){
+        snd_seq_client_info_t *cinfo;
+        snd_seq_port_info_t *pinfo;
+
+        snd_seq_client_info_alloca(&cinfo);
+        snd_seq_port_info_alloca(&pinfo);
+        snd_seq_client_info_set_client(cinfo, -1);
+        while (snd_seq_query_next_client(seq_handle, cinfo) >= 0) {
+                snd_seq_port_info_set_client(pinfo, snd_seq_client_info_get_client(cinfo));
+                snd_seq_port_info_set_port(pinfo, -1);
+                while (snd_seq_query_next_port(seq_handle, pinfo) >= 0) {
+                        func(cinfo, pinfo, data);
+                }
+        }
+}
+
+static void loop_over_subs(void (*func)(snd_seq_query_subscribe_t*, void*), snd_seq_port_info_t* pinfo, void* data){
+
+        const snd_seq_addr_t* addr = snd_seq_port_info_get_addr(pinfo);
+
+        snd_seq_query_subscribe_t *subs;
+        snd_seq_query_subscribe_alloca(&subs);
+        snd_seq_query_subscribe_set_root(subs, addr);
+
+        snd_seq_query_subscribe_set_type(subs, SND_SEQ_QUERY_SUBS_READ); // connecting to
+        snd_seq_query_subscribe_set_index(subs, 0);
+        while (snd_seq_query_port_subscribers(seq_handle, subs) >= 0) {
+                func(subs, data);
+        }
+}
+
+
+static char alsaseq_connect__doc__[] =
+"connect(in_client, in_port, out_client, out_port) --> alsa error code.\n\nConnect two client:ports."
+;
+
+static PyObject *
+alsaseq_connect(PyObject *self, PyObject *args)
+{
+        int in_client, in_port, out_client, out_port;
+        snd_seq_port_subscribe_t* subs;
+        snd_seq_addr_t sender, dest;
+
+	if (!PyArg_ParseTuple(args, "iiii", &in_client, &in_port, &out_client, &out_port ))
+		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
+        snd_seq_port_subscribe_malloc(&subs);
+        memset(subs, 0, snd_seq_port_subscribe_sizeof());
+        sender.client = in_client;
+        sender.port = in_port;
+        dest.client = out_client;
+        dest.port = out_port;
+        snd_seq_port_subscribe_set_sender(subs, &sender);
+        snd_seq_port_subscribe_set_dest(subs, &dest);
+
+        int res = snd_seq_subscribe_port(seq_handle, subs);
+
+        snd_seq_port_subscribe_free(subs);
+        return PyInt_FromLong(res);
+}
+
+static char alsaseq_disconnect__doc__[] =
+"disconnect(in_client, in_port, out_client, out_port) --> alsa error code.\n\nDisconnect two client:ports if they are already connected."
+;
+
+static PyObject *
+alsaseq_disconnect(PyObject *self, PyObject *args)
+{
+        int in_client, in_port, out_client, out_port;
+        snd_seq_port_subscribe_t* subs;
+        snd_seq_addr_t sender, dest;
+
+	if (!PyArg_ParseTuple(args, "iiii", &in_client, &in_port, &out_client, &out_port ))
+		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
+        snd_seq_port_subscribe_malloc(&subs);
+        memset(subs, 0, snd_seq_port_subscribe_sizeof());
+        sender.client = in_client;
+        sender.port = in_port;
+        dest.client = out_client;
+        dest.port = out_port;
+        snd_seq_port_subscribe_set_sender(subs, &sender);
+        snd_seq_port_subscribe_set_dest(subs, &dest);
+
+        int res = snd_seq_unsubscribe_port(seq_handle, subs);
+
+        snd_seq_port_subscribe_free(subs);
+        return PyInt_FromLong(res);
+}
+
+
+static char alsaseq_listconnections__doc__[] =
+"listconnections() --> list of connections.\n\nList alsa midi connections."
+;
+
+static PyObject *
+alsaseq_listconnections(PyObject *self, PyObject *args)
+{
+	if (!PyArg_ParseTuple(args, ""))
+		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
+        PyObject* list = PyList_New(0);
+
+        void fill_subs(snd_seq_query_subscribe_t* subs, void* data){
+                const snd_seq_addr_t *conn_addr = snd_seq_query_subscribe_get_addr(subs);
+                const snd_seq_addr_t *addr = snd_seq_query_subscribe_get_root(subs);
+                PyObject* l_list = (PyObject*)data;
+
+                PyObject* root_tuple = PyTuple_New(2);
+                PyObject* from_tuple = PyTuple_New(2);
+                PyObject* to_tuple   = PyTuple_New(2);
+
+                PyTuple_SetItem(from_tuple, 0, PyInt_FromLong(addr->client));
+                PyTuple_SetItem(from_tuple, 1, PyInt_FromLong(addr->port));
+
+                PyTuple_SetItem(to_tuple, 0, PyInt_FromLong(conn_addr->client));
+                PyTuple_SetItem(to_tuple, 1, PyInt_FromLong(conn_addr->port));
+
+                PyTuple_SetItem(root_tuple, 0, from_tuple);
+                PyTuple_SetItem(root_tuple, 1, to_tuple);
+
+                PyList_Append(l_list, root_tuple);
+                snd_seq_query_subscribe_set_index(subs, snd_seq_query_subscribe_get_index(subs) + 1);
+        }
+
+        void port_connections_to(snd_seq_client_info_t* cinfo, snd_seq_port_info_t* pinfo, void* data){
+                loop_over_subs(fill_subs, pinfo, data);
+        }
+
+        loop_over_all_ports(port_connections_to, (void*)list);
+
+        return list;
+}
+
+static char alsaseq_listdevices__doc__[] =
+"listdevices() --> return listing of all devices and their ports.\n\nList alsa midi devices and all their ports and info and stuff."
+;
+
+static PyObject *
+alsaseq_listdevices(PyObject *self, PyObject *args)
+{
+        if (!PyArg_ParseTuple(args, ""))
+		return NULL;
+
+        if (!seq_handle) {
+                PyErr_SetString(PyExc_RuntimeError, "Must initialize module with alsaseq.client() before using it");
+                return NULL;
+        }
+
+        void clients_ports_info(snd_seq_client_info_t* cinfo, snd_seq_port_info_t* pinfo, void* data){
+                PyObject* out_dict = (PyObject*)data;
+                const char* client_name = snd_seq_client_info_get_name(cinfo);
+                const char* port_name = snd_seq_port_info_get_name(pinfo);
+                int port_num = snd_seq_port_info_get_port(pinfo);
+                PyObject* port_capabilities = PyInt_FromLong(snd_seq_port_info_get_capability(pinfo));
+                PyObject* this_client;
+                if (!PyDict_Contains(out_dict, PyUnicode_FromString(client_name))){
+                        this_client = PyDict_New();
+                        PyDict_SetItemString(this_client, "name", PyUnicode_FromString(client_name));
+                        PyDict_SetItemString(this_client, "num", PyInt_FromLong(snd_seq_client_info_get_client(cinfo)));
+                        PyDict_SetItemString(this_client, "ports", PyList_New(0));
+                        PyDict_SetItemString(out_dict, client_name, this_client);
+                }
+                this_client = PyDict_GetItemString(out_dict, client_name);
+                this_client = PyDict_GetItemString(this_client, "ports");
+
+                // add port
+                PyObject* this_port = PyDict_New();
+                PyDict_SetItemString(this_port, "name", PyUnicode_FromString(port_name));
+                PyDict_SetItemString(this_port, "num", PyInt_FromLong(port_num));
+                PyDict_SetItemString(this_port, "caps", port_capabilities);
+                PyList_Append(this_client, this_port);
+
+        }
+
+        PyObject* out_dict = PyDict_New();
+        loop_over_all_ports(clients_ports_info, (void*)out_dict);
+
+        return out_dict;
+}
+
 /* start python 2 & python 3 dual support for initialization */
 
 struct module_state {
@@ -518,6 +714,10 @@ static struct PyMethodDef alsaseq_methods[] = {
  {"id",	(PyCFunction)alsaseq_id,	METH_VARARGS,	alsaseq_id__doc__},
  {"input",	(PyCFunction)alsaseq_input,	METH_VARARGS,	alsaseq_input__doc__},
  {"fd",	(PyCFunction)alsaseq_fd,	METH_VARARGS,	alsaseq_fd__doc__},
+ {"connect", (PyCFunction)alsaseq_connect, METH_VARARGS, alsaseq_connect__doc__},
+ {"disconnect", (PyCFunction)alsaseq_disconnect, METH_VARARGS, alsaseq_disconnect__doc__},
+ {"listconnections", (PyCFunction)alsaseq_listconnections, METH_VARARGS, alsaseq_listconnections__doc__},
+ {"listdevices", (PyCFunction)alsaseq_listdevices, METH_VARARGS, alsaseq_listdevices__doc__},
  
 	{NULL,	 (PyCFunction)NULL, 0, NULL}		/* sentinel */
 };
