@@ -184,22 +184,25 @@ static char alsaseq_sysex__doc__[] =
 "sysex( event ) --> None.\n\n"
 "Send SYSEX event, e.g:\n"
 "           b = bytearray()\n"
-"           b.append('\xF0') # SYSEX start\n"
+"           b.append('\\xF0') # SYSEX start\n"
 "           for c in arr:     # create sysex from byte array example\n"
 "               b.append(c+1) # if array elements can be zero, shift up: sysex may not contain zero chars\n"
 "           for c in strng:   # create sysex from a string\n"
 "               b.append(ord(c))\n"
-"           b.append('\xF7')  # SYSEX finish\n"
+"           b.append('\\xF7')  # SYSEX finish\n"
 "           alsaseq.sysex((130, 0, 0, 253, (0, 0), (0, 5), (0, 0), str(b)))\n";
 
 static PyObject * alsaseq_sysex(PyObject *self, PyObject *args) {
   snd_seq_event_t ev;
   const char * data;
+  PyBytesObject * bytes;
         
-	if (!PyArg_ParseTuple(args, "(bbbb(ii)(bb)(bb)s)", &ev.type, &ev.flags, &ev.tag, &ev.queue, &ev.time.time.tv_sec, &ev.time.time.tv_nsec, &ev.source.client, &ev.source.port, &ev.dest.client, &ev.dest.port, &data ))
+	if (!PyArg_ParseTuple(args, "(bbbb(ii)(bb)(bb)S)", &ev.type, &ev.flags, &ev.tag, &ev.queue, &ev.time.time.tv_sec, &ev.time.time.tv_nsec, &ev.source.client, &ev.source.port, &ev.dest.client, &ev.dest.port, &bytes ))
 		return NULL;
 
-	snd_seq_ev_set_sysex(&ev, strlen(data), data);
+	data = PyBytes_AsString((PyObject *) bytes);
+	printf("%d: %p\n", PySequence_Size((PyObject *) bytes), data);
+	snd_seq_ev_set_sysex(&ev, PySequence_Size((PyObject *) bytes), data);
 
         /* If not a direct event, use the queue */
         if ( ev.queue != SND_SEQ_QUEUE_DIRECT )
