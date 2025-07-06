@@ -194,7 +194,7 @@ static char alsaseq_sysex__doc__[] =
 
 static PyObject * alsaseq_sysex(PyObject *self, PyObject *args) {
   snd_seq_event_t ev;
-  const char * data;
+  char * data;
   PyBytesObject * bytes;
         
 	if (!PyArg_ParseTuple(args, "(bbbb(ii)(bb)(bb)S)", &ev.type, &ev.flags, &ev.tag, &ev.queue, &ev.time.time.tv_sec, &ev.time.time.tv_nsec, &ev.source.client, &ev.source.port, &ev.dest.client, &ev.dest.port, &bytes ))
