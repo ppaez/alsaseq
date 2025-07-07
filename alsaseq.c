@@ -194,15 +194,22 @@ static char alsaseq_sysex__doc__[] =
 
 static PyObject * alsaseq_sysex(PyObject *self, PyObject *args) {
   snd_seq_event_t ev;
-  char * data;
-  PyBytesObject * bytes;
+  int len, i;
+  char *data, *bytes;
+  PyBytesObject *bytesobject;
         
-	if (!PyArg_ParseTuple(args, "(bbbb(ii)(bb)(bb)S)", &ev.type, &ev.flags, &ev.tag, &ev.queue, &ev.time.time.tv_sec, &ev.time.time.tv_nsec, &ev.source.client, &ev.source.port, &ev.dest.client, &ev.dest.port, &bytes ))
+	if (!PyArg_ParseTuple(args, "(bbbb(ii)(bb)(bb)S)", &ev.type, &ev.flags, &ev.tag, &ev.queue, &ev.time.time.tv_sec, &ev.time.time.tv_nsec, &ev.source.client, &ev.source.port, &ev.dest.client, &ev.dest.port, &bytesobject ))
 		return NULL;
 
-	data = PyBytes_AsString((PyObject *) bytes);
-	printf("%d: %p\n", PySequence_Size((PyObject *) bytes), data);
-	snd_seq_ev_set_sysex(&ev, PySequence_Size((PyObject *) bytes), data);
+	bytes = PyBytes_AsString((PyObject *) bytesobject);
+	len = PySequence_Size((PyObject *) bytesobject);
+	data = (char *) malloc (len + 3);
+	*data = '\xf0';
+	for (i = 0; i < len; i++)
+	  *(data + i + 1) = *(bytes + i);
+	*(data + len + 1) = '\xf7';
+	*(data + len + 2) = '\0';
+	snd_seq_ev_set_sysex(&ev, len + 2, data);
 
         /* If not a direct event, use the queue */
         if ( ev.queue != SND_SEQ_QUEUE_DIRECT )
@@ -215,6 +222,7 @@ static PyObject * alsaseq_sysex(PyObject *self, PyObject *args) {
         /* Use subscribed ports, except if ECHO event */
         if ( ev.type != SND_SEQ_EVENT_ECHO ) snd_seq_ev_set_subs(&ev);
         snd_seq_event_output_direct( seq_handle, &ev );
+	free(data);
         
 	Py_INCREF(Py_None);
 	return Py_None;
