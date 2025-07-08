@@ -182,15 +182,10 @@ alsaseq_status(PyObject *self /* Not used */, PyObject *args)
 
 static char alsaseq_sysex__doc__[] = 
 "sysex( event ) --> None.\n\n"
-"Send SYSEX event, e.g:\n"
-"           b = bytearray()\n"
-"           b.append('\\xF0') # SYSEX start\n"
-"           for c in arr:     # create sysex from byte array example\n"
-"               b.append(c+1) # if array elements can be zero, shift up: sysex may not contain zero chars\n"
-"           for c in strng:   # create sysex from a string\n"
-"               b.append(ord(c))\n"
-"           b.append('\\xF7')  # SYSEX finish\n"
-"           alsaseq.sysex((130, 0, 0, 253, (0, 0), (0, 5), (0, 0), str(b)))\n";
+"Send a SySex event to output port.  See output() for more details.\n\n"
+"The SysEx data, i.e. the eighth element of the event, "
+"must be bytes or bytearray.\n\n"
+"For example, to send 2ef0f1f2, you can use bytes.fromhex('2ef0 F1f2').\n";
 
 static PyObject * alsaseq_sysex(PyObject *self, PyObject *args) {
   snd_seq_event_t ev;
