@@ -242,6 +242,9 @@ alsaseq_output(PyObject *self, PyObject *args)
 {
   snd_seq_event_t ev;
   static PyObject * data;
+  int len, i;
+  char *sysex, *bytes;
+  PyBytesObject *bytesobject;
         
 	if (!PyArg_ParseTuple(args, "(bbbb(ii)(bb)(bb)O)", &ev.type, &ev.flags, &ev.tag, &ev.queue, &ev.time.time.tv_sec, &ev.time.time.tv_nsec, &ev.source.client, &ev.source.port, &ev.dest.client, &ev.dest.port, &data ))
 		return NULL;
@@ -268,6 +271,20 @@ alsaseq_output(PyObject *self, PyObject *args)
             if (!PyArg_ParseTuple( data, "bbbbii;data parameter should have 6 values", &ev.data.control.channel, &ev.data.control.unused[0], &ev.data.control.unused[1], &ev.data.control.unused[2], &ev.data.control.param, &ev.data.control.value ))
             return NULL;
             break;
+
+	case SND_SEQ_EVENT_SYSEX:
+            if (!PyArg_ParseTuple( data, "S; data parameter should have 1 bytes value", &bytesobject ))
+		return NULL;
+	bytes = PyBytes_AsString((PyObject *) bytesobject);
+	len = PySequence_Size((PyObject *) bytesobject);
+	sysex = (char *) malloc (len + 3);
+	*sysex = '\xf0';
+	for (i = 0; i < len; i++)
+	  *(sysex + i + 1) = *(bytes + i);
+	*(sysex + len + 1) = '\xf7';
+	*(sysex + len + 2) = '\0';
+	snd_seq_ev_set_sysex(&ev, len + 2, sysex);
+            break;
         }
         /* If not a direct event, use the queue */
         if ( ev.queue != SND_SEQ_QUEUE_DIRECT )
@@ -280,6 +297,7 @@ alsaseq_output(PyObject *self, PyObject *args)
         /* Use subscribed ports, except if ECHO event */
         if ( ev.type != SND_SEQ_EVENT_ECHO ) snd_seq_ev_set_subs(&ev);
         snd_seq_event_output_direct( seq_handle, &ev );
+	if (ev.type == SND_SEQ_EVENT_SYSEX) free(sysex);
 
 	Py_INCREF(Py_None);
 	return Py_None;
