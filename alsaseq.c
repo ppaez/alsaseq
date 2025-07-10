@@ -180,49 +180,6 @@ alsaseq_status(PyObject *self /* Not used */, PyObject *args)
 	return Py_BuildValue( "(i(ii),i)", running, current_time->tv_sec, current_time->tv_nsec, events );
 }
 
-static char alsaseq_sysex__doc__[] = 
-"sysex( event ) --> None.\n\n"
-"Send a SySex event to output port.  See output() for more details.\n\n"
-"The SysEx data, i.e. the eighth element of the event, "
-"must be bytes or bytearray.\n\n"
-"For example, to send 2ef0f1f2, you can use bytes.fromhex('2ef0 F1f2').\n";
-
-static PyObject * alsaseq_sysex(PyObject *self, PyObject *args) {
-  snd_seq_event_t ev;
-  int len, i;
-  char *data, *bytes;
-  PyBytesObject *bytesobject;
-        
-	if (!PyArg_ParseTuple(args, "(bbbb(ii)(bb)(bb)S)", &ev.type, &ev.flags, &ev.tag, &ev.queue, &ev.time.time.tv_sec, &ev.time.time.tv_nsec, &ev.source.client, &ev.source.port, &ev.dest.client, &ev.dest.port, &bytesobject ))
-		return NULL;
-
-	bytes = PyBytes_AsString((PyObject *) bytesobject);
-	len = PySequence_Size((PyObject *) bytesobject);
-	data = (char *) malloc (len + 3);
-	*data = '\xf0';
-	for (i = 0; i < len; i++)
-	  *(data + i + 1) = *(bytes + i);
-	*(data + len + 1) = '\xf7';
-	*(data + len + 2) = '\0';
-	snd_seq_ev_set_sysex(&ev, len + 2, data);
-
-        /* If not a direct event, use the queue */
-        if ( ev.queue != SND_SEQ_QUEUE_DIRECT )
-            ev.queue = queue_id;
-        /* Modify source port if out of bounds */
-        if ( ev.source.port < firstoutputport ) 
-           snd_seq_ev_set_source(&ev, firstoutputport );
-        else if ( ev.source.port > lastoutputport )
-           snd_seq_ev_set_source(&ev, lastoutputport );
-        /* Use subscribed ports, except if ECHO event */
-        if ( ev.type != SND_SEQ_EVENT_ECHO ) snd_seq_ev_set_subs(&ev);
-        snd_seq_event_output_direct( seq_handle, &ev );
-	free(data);
-        
-	Py_INCREF(Py_None);
-	return Py_None;
-}
-
 static char alsaseq_output__doc__[] =
 "output( event ) --> None.\n\n"
 "Send event to output port, scheduled if a queue exists,\n"
@@ -764,7 +721,6 @@ static struct PyMethodDef alsaseq_methods[] = {
  {"start",	(PyCFunction)alsaseq_start,	METH_VARARGS,	alsaseq_start__doc__},
  {"stop",	(PyCFunction)alsaseq_stop,	METH_VARARGS,	alsaseq_stop__doc__},
  {"status",	(PyCFunction)alsaseq_status,	METH_VARARGS,	alsaseq_status__doc__},
- {"sysex",	(PyCFunction)alsaseq_sysex,	METH_VARARGS,	alsaseq_sysex__doc__},
  {"output",	(PyCFunction)alsaseq_output,	METH_VARARGS,	alsaseq_output__doc__},
  {"syncoutput",	(PyCFunction)alsaseq_syncoutput,	METH_VARARGS,	alsaseq_syncoutput__doc__},
  {"connectto",	(PyCFunction)alsaseq_connectto,	METH_VARARGS,	alsaseq_connectto__doc__},
