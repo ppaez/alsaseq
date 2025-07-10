@@ -86,6 +86,23 @@ class ChanPress(TestCase):
         self.assertEqual(expected, chanpress(1, 9, 1000))
 
 
+class SysEx(TestCase):
+
+    def test_sent_directly(self):
+        from alsamidi import sysexevent
+
+        data = (bytes.fromhex('01f2'))
+        expected = (130, 1, 0, 253, (0, 0), (0, 0), (0, 0), (data,))
+        self.assertEqual(expected, sysexevent('01f2'))
+
+    def test_scheduled(self):
+        from alsamidi import sysexevent
+
+        data = (bytes.fromhex('01f2'))
+        expected = (130, 1, 0, 0, (1, 0), (0, 0), (0, 0), (data,))
+        self.assertEqual(expected, sysexevent('01 f2', 1000))
+
+
 class Tuple2Time(TestCase):
 
     def test(self):

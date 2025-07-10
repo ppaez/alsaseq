@@ -142,6 +142,24 @@ def chanpress(ch, value, start=-1):
                 (0, 0), (0, 0), (ch, 0, value))
 
 
+def sysexevent(data, start=-1):
+    '''Return an ALSA event tuple to be sent by alsaseq.output().
+
+    If start is not used, the event will be sent directly.
+    If start is provided, the event will be scheduled in a queue.'''
+
+    if start < 0:
+        return (alsaseq.SND_SEQ_EVENT_SYSEX,
+                alsaseq.SND_SEQ_TIME_STAMP_REAL,
+                0, SND_SEQ_QUEUE_DIRECT, (0, 0),
+                (0, 0), (0, 0), (bytes.fromhex(data),))
+    else:
+        return (alsaseq.SND_SEQ_EVENT_SYSEX,
+                alsaseq.SND_SEQ_TIME_STAMP_REAL,
+                0, queue, (int(start/1000), int(start % 1000 * 1000000)),
+                (0, 0), (0, 0), (bytes.fromhex(data),))
+
+
 def tuple2time(timetuple):
     '''Convert ( seconds, millionths ) tuple to float'''
     return timetuple[0] + timetuple[1] / 1000000000.
